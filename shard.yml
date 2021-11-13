@@ -1,0 +1,13 @@
+name: monyet
+version: 0.1.0
+
+authors:
+  - Mario Arias <mario@marioarias.org>
+
+targets:
+  monyet:
+    main: src/monyet.cr
+
+crystal: 1.2.2
+
+license: MIT
