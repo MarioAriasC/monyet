@@ -37,15 +37,11 @@ module Lexers
     end
 
     private def read_number : String
-      read_value do |ch|
-        ch.number?
-      end
+      read_value { |ch| ch.number? }
     end
 
     private def read_identifier : String
-      read_value do |ch|
-        ch.is_identifier?
-      end
+      read_value { |ch| ch.is_identifier? }
     end
 
     private def read_string : String

@@ -5,7 +5,6 @@ require "../src/token"
 include Tokens
 
 describe "Lexer" do
-
   it "validate lexer" do
     code = "
     let five = 5;

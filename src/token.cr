@@ -17,7 +17,6 @@ module Tokens
     def object_id
       @value.object_id
     end
-    
   end
 
   ILLEGAL = TokenType.new("ILLEGAL")
@@ -76,10 +75,7 @@ module Tokens
     def initialize(@type : TokenType, @literal : Char)
       initialize(@type, @literal.to_s)
     end
-    
   end
-
-
 end
 
 class String

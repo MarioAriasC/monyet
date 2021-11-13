@@ -1,5 +1,4 @@
 module Utils
-
 end
 
 class Object
