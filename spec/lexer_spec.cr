@@ -120,10 +120,10 @@ describe "Lexer" do
       {STRING, "bar"},
       {RBRACE, "}"},
       {EOF, ""},
-    ].each do |expected|
+    ].each do |type, literal|
       token = lexer.next_token
-      token.type.should be(expected[0])
-      token.literal.should eq expected[1]
+      token.type.should be(type)
+      token.literal.should eq literal
     end
   end
 end

@@ -1,14 +1,12 @@
 require "./token"
 
 module Lexers
-  ZERO = '\0'
-
   WHITE_SPACES = [' ', '\t', '\n', '\r']
 
   class Lexer
     @position = 0
     @read_position = 0
-    @ch : Char = ZERO
+    @ch : Char = Char::ZERO
 
     def initialize(@input : String)
       self.read_char
@@ -22,7 +20,7 @@ module Lexers
 
     private def peak_char
       if @read_position >= @input.size
-        ZERO
+        Char::ZERO
       else
         @input[@read_position]
       end
@@ -48,7 +46,7 @@ module Lexers
       start = @position + 1
       while true
         read_char
-        if @ch == '"' || @ch == ZERO
+        if @ch == '"' || @ch == Char::ZERO
           break
         end
       end
@@ -121,7 +119,7 @@ module Lexers
         r = ends_with_equal(BANG, NOT_EQ, false)
       when '"'
         r = Token.new(STRING, read_string)
-      when ZERO
+      when Char::ZERO
         r = Token.new(EOF, "")
       else
         case
