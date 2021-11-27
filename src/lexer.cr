@@ -133,7 +133,7 @@ module Lexers
         end
       end
       read_char
-      r
+      return r
     end
   end
 end

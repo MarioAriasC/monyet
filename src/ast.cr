@@ -35,7 +35,7 @@ module Ast
     def initialize(@statements : Array(Statement))
     end
 
-    def token_literal
+    def token_literal : String
       if @statements.empty
         return ""
       else
@@ -94,13 +94,13 @@ module Ast
 
   class ReturnStatement < Statement
     include TokenHolder
-    getter? value
+    getter? return_value
 
-    def initialize(@token : Token, @value : Expression?)
+    def initialize(@token : Token, @return_value : Expression?)
     end
 
     def to_s(io)
-      io << "#{token_literal} #{@value.or_else("")}"
+      io << "#{token_literal} #{@return_value.or_else("")}"
     end
   end
 
@@ -132,10 +132,10 @@ module Ast
   class InfixExpression < Expression
     include TokenHolder
     getter? left
-    getter value
+    getter operator
     getter? right
 
-    def initialize(@token : Token, @left : Expression?, @value : String, @right : Expression?)
+    def initialize(@token : Token, @left : Expression?, @operator : String, @right : Expression?)
     end
 
     def to_s(io)
@@ -152,7 +152,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "#{@arguments}(#{@arguments.or_else([] of String).join(", ")})"
+      io << "#{@function}(#{@arguments.or_else([] of String).join(", ")})"
     end
   end
 
@@ -164,7 +164,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "#{statements.or_else([] of String).join}"
+      io << "#{@statements.or_else([] of String).join}"
     end
   end
 
@@ -179,7 +179,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "if#{@codition} #{@consequence} #{@alternative ? "else #{alternative}" : ""}"
+      io << "if#{@condition} #{@consequence} #{@alternative ? "else #{@alternative}" : ""}"
     end
   end
 
@@ -193,7 +193,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "#{token_literal}#{@name.empty? "": "<#{@name}>"}(#{@parameters.or_else([] of String).join(", ")}) #{@body}"
+      io << "#{token_literal}#{@name.empty? ? "" : "<#{@name}>"}(#{@parameters.or_else([] of String).join(", ")}) #{@body}"
     end
   end
 
@@ -213,7 +213,7 @@ module Ast
   class ArrayLiteral < Expression
     include TokenHolder
 
-    getter? @elements
+    getter? elements
 
     def initialize(@token : Token, @elements : Array(Expression?)?)
     end
@@ -246,7 +246,7 @@ module Ast
     end
 
     def to_s(io)
-      io < "{#{@pair.each { |key, value| "#{key}:#{value}" }}}"
+      io << "{#{@pairs.each { |key, value| "#{key}:#{value}" }}}"
     end
   end
 end

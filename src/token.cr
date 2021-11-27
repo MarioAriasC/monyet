@@ -72,8 +72,8 @@ module Tokens
     def initialize(@type : TokenType, @literal : String)
     end
 
-    def initialize(@type : TokenType, @literal : Char)
-      initialize(@type, @literal.to_s)
+    def initialize(@type : TokenType, literal : Char)
+      initialize(@type, literal.to_s)
     end
   end
 end

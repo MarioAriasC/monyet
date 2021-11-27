@@ -9,6 +9,20 @@ class Object
       alternative
     end
   end
+
+  def not_null
+    if self
+      yield self
+    end
+  end
+
+  def not_null!
+    if self
+      return self
+    else
+      raise "Nil Value"
+    end
+  end
 end
 
 class String
