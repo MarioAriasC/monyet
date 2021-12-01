@@ -4,12 +4,11 @@ require "../src/parser"
 include Parsers
 
 macro test_branch(if_expression, branch_name, value)
-  {{if_expression}}.{{branch_name}}?.not_null!.statements?.not_null do |statements|
-      statements.size.should eq(1)
-      check_type_es(statements[0]) do |statement|
-        test_identifier(statement.expression?, {{value}})
-      end
-    end
+  statements = {{if_expression}}.{{branch_name}}?.not_nil!.statements?.not_nil!
+  statements.size.should eq(1)
+  check_type_es(statements[0]) do |statement|
+    test_identifier(statement.expression?, {{value}})
+  end
 end
 
 describe "Parser" do
@@ -280,18 +279,15 @@ describe "Parser" do
     program = create_program(input)
     check_type_es(program.statements[0]) do |expression_statement|
       check_type_fl(expression_statement.expression?) do |function_literal|
-        function_literal.parameters?.not_null do |parameters|
-          test_literal_expression(parameters[0], "x")
-          test_literal_expression(parameters[1], "y")
-        end
+        parameters = function_literal.parameters?.not_nil!
+        test_literal_expression(parameters[0], "x")
+        test_literal_expression(parameters[1], "y")
+        body = function_literal.body?.not_nil!
 
-        function_literal.body?.not_null do |body|
-          body.statements?.not_null do |statements|
-            statements.size.should eq(1)
-            check_type_es(statements[0]) do |statement|
-              test_infix_expression(statement.expression?, "x", "+", "y")
-            end
-          end
+        statements = body.statements?.not_nil!
+        statements.size.should eq(1)
+        check_type_es(statements[0]) do |statement|
+          test_infix_expression(statement.expression?, "x", "+", "y")
         end
       end
     end
@@ -306,11 +302,10 @@ describe "Parser" do
       program = create_program(input)
       check_type_es(program.statements[0]) do |expression_statement|
         check_type_fl(expression_statement.expression?) do |function_literal|
-          function_literal.parameters?.not_null do |parameters|
-            parameters.size.should eq(expected_params.size)
-            expected_params.each_index do |i|
-              test_literal_expression(parameters[i], expected_params[i])
-            end
+          parameters = function_literal.parameters?.not_nil!
+          parameters.size.should eq(expected_params.size)
+          expected_params.each_with_index do |expected_param, i|
+            test_literal_expression(parameters[i], expected_param)
           end
         end
       end
@@ -324,11 +319,11 @@ describe "Parser" do
     check_type_es(program.statements[0]) do |expression_statement|
       check_type_ce(expression_statement.expression?) do |call_expression|
         test_identifier(call_expression.function?, "add")
-        call_expression.arguments?.not_null do |arguments|
-          test_literal_expression(arguments[0], 1)
-          test_infix_expression(arguments[1], 2, "*", 3)
-          test_infix_expression(arguments[2], 4, "+", 5)
-        end
+        arguments = call_expression.arguments?.not_nil!
+
+        test_literal_expression(arguments[0], 1)
+        test_infix_expression(arguments[1], 2, "*", 3)
+        test_infix_expression(arguments[2], 4, "+", 5)
       end
     end
   end
@@ -349,11 +344,10 @@ describe "Parser" do
     program = create_program(input)
     check_type_es(program.statements[0]) do |expression_statement|
       check_type_al(expression_statement.expression?) do |array_literal|
-        array_literal.elements?.not_null do |elements|
-          test_long_literal(elements[0], 1)
-          test_infix_expression(elements[1], 2, "*", 2)
-          test_infix_expression(elements[2], 3, "+", 3)
-        end
+        elements = array_literal.elements?.not_nil!
+        test_long_literal(elements[0], 1)
+        test_infix_expression(elements[1], 2, "*", 2)
+        test_infix_expression(elements[2], 3, "+", 3)
       end
     end
   end

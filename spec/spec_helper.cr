@@ -3,8 +3,10 @@ require "../src/monyet"
 require "../src/parser"
 require "../src/ast"
 require "../src/lexer"
+require "../src/evaluator"
 include Parsers
 include Lexers
+include Evaluator
 
 macro define_check_type(suffix, t)
   def check_type_{{suffix}}(value, &block : {{t}} -> _)
@@ -14,6 +16,17 @@ macro define_check_type(suffix, t)
       else
         raise "Value is not #{ {{t}} }, got=#{typeof(value)}"
       end
+  end
+end
+
+macro define_test_object(suffix, t, v)
+  def test_object_{{suffix}}(obj : MObject?, expected : {{v}})
+    case obj
+      when {{t}}
+        obj.value.should eq(expected)
+      else
+        raise "obj is not #{ {{t}} }, got=#{typeof(obj)}, #{obj}"
+    end
   end
 end
 
@@ -47,10 +60,14 @@ define_check_type sl, StringLiteral
 define_check_type al, ArrayLiteral
 define_check_type iex, IndexExpression
 define_check_type i, Identifier
-define_check_type bl, BoolLiteral
+define_check_type bl, BooleanLiteral
 define_check_type il, IntegerLiteral
 define_check_type ie, InfixExpression
 define_check_type hl, HashLiteral
+define_check_type error, MError
+define_check_type fn, MFunction
+define_check_type ar, MArray
+define_check_type h, MHash
 
 def test_let_statement(statement : Statement, expected_identifier : String)
   statement.token_literal.should eq("let")
@@ -107,4 +124,17 @@ def test_infix_expression(expression : Expression?, left_value, operator : Strin
     infix_expression.operator.should eq(operator)
     test_literal_expression(infix_expression.right?, right_value)
   end
+end
+
+def test_eval(input : String)
+  program = create_program(input)
+  return Evaluator.eval(program, Environment.new)
+end
+
+define_test_object il, MInteger, Int64
+define_test_object bl, MBoolean, Bool
+define_test_object s, MString, String
+
+def test_nil_object(obj : MObject?)
+  obj.not_nil!.should eq(NULL)
 end

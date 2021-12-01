@@ -70,7 +70,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "#{token_literal} #{@name} #{@value.or_else("")}"
+      io << "#{token_literal} #{@name} #{@value.or_else("")};"
     end
   end
 
@@ -83,7 +83,7 @@ module Ast
     end
   end
 
-  class BoolLiteral < Expression
+  class BooleanLiteral < Expression
     include TokenHolder
     include LiteralExpression
     getter value
@@ -100,7 +100,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "#{token_literal} #{@return_value.or_else("")}"
+      io << "#{token_literal} #{@return_value.or_else("")};"
     end
   end
 
@@ -164,7 +164,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "#{@statements.or_else([] of String).join}"
+      io << "#{@statements.or_else([] of String).join("")}"
     end
   end
 
@@ -246,7 +246,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "{#{@pairs.each { |key, value| "#{key}:#{value}" }}}"
+      io << "{#{@pairs.map { |key, value| "#{key}:#{value}" }.join(", ")}}"
     end
   end
 end

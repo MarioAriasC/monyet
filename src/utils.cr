@@ -10,18 +10,9 @@ class Object
     end
   end
 
-  def not_null
-    if self
-      yield self
-    end
-  end
-
-  def not_null!
-    if self
-      return self
-    else
-      raise "Nil Value"
-    end
+  def also(&block : self | Nil -> _) : self
+    block.call(self)
+    return self
   end
 end
 

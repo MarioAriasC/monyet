@@ -119,7 +119,7 @@ module Parsers
     end
 
     private def parse_boolean_literal
-      rexp? BoolLiteral.new(@cur_token, cur_token_is(TRUE))
+      rexp? BooleanLiteral.new(@cur_token, cur_token_is(TRUE))
     end
 
     private def parse_identifier
@@ -339,7 +339,7 @@ module Parsers
         ex_peek COLON
         next_token
         value = parse_expression(Precedence::Lowest)
-        pairs[key.not_null!] = value.not_null!
+        pairs[key.not_nil!] = value.not_nil!
         if (!peek_token_is?(RBRACE) && !expect_peek?(COMMA))
           return nil
         end
