@@ -1,3 +1,5 @@
+require "string_pool"
+
 macro define_type_desc
   def type_desc : String
     return {{ @type.stringify }}
@@ -8,6 +10,8 @@ module Objects
   extend self
 
   MNULL = MNull.new
+
+  POOL = StringPool.new
 
   enum HashType
     Integer
@@ -180,7 +184,7 @@ module Objects
     define_type_desc
 
     def hash_key : HashKey
-      p "MString hash_key #{@value}:#{@value.object_id}"
+      @value = POOL.get(@value)
       return HashKey.new(hash_type, @value.object_id)
     end
   end

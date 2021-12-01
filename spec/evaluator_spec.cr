@@ -158,11 +158,11 @@ describe "Evaluator" do
         "identifier not found: foobar",
       },
       {
-        "\"Hello\" - \"World\"",
+        %("Hello" - "World"),
         "unknown operator: Objects::MString - Objects::MString",
       },
       {
-        "{\"name\": \"Monkey\"}[fn(x) {x}];",
+        %({"name": "Monkey"}[fn(x) {x}];),
         "unusable as a hash key: Objects::MFunction",
       },
     ].each do |input, expected|
@@ -347,21 +347,39 @@ describe "Evaluator" do
       	})
     evaluated = test_eval(input)
     check_type_h(evaluated) do |result|
-      pp result.pairs
       expected = {
-        MString.new("one").hash_key   => 1.to_i64,
-        MString.new("two").hash_key   => 2.to_i64,
-        MString.new("three").hash_key => 3.to_i64,
-        MInteger.new(4).hash_key      => 4.to_i64,
-        MTRUE.hash_key                => 5.to_i64,
-        MFALSE.hash_key               => 6.to_i64,
+        MString.new("one").hash_key   => 1,
+        MString.new("two").hash_key   => 2,
+        MString.new("three").hash_key => 3,
+        MInteger.new(4).hash_key      => 4,
+        MTRUE.hash_key                => 5,
+        MFALSE.hash_key               => 6,
       }
       expected.size.should eq(result.pairs.size)
       expected.each do |expected_key, expected_value|
-        pp "expected_key #{expected_key}"
         pair = result.pairs[expected_key]?
         pair.should_not be_nil
-        test_object_il(pair.not_nil!.value, expected_value)
+        test_object_il(pair.not_nil!.value, expected_value.to_i64)
+      end
+    end
+  end
+
+  it "hash index expressions" do
+    [
+      { %({"foo": 5}["foo"]), 5 },
+      { %({"foo": 5}["bar"]), nil },
+      { %(let key = "foo";{"foo": 5}[key]), 5 },
+      { %({}["foo"]), nil },
+      {"{5:5}[5]", 5},
+      {"{true:5}[true]", 5},
+      {"{false:5}[false]", 5},
+    ].each do |input, expected|
+      evaluated = test_eval(input)
+      case expected
+      when Int32
+        test_object_il(evaluated, expected.to_i64)
+      else
+        test_nil_object(evaluated)
       end
     end
   end

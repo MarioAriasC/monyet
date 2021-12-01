@@ -329,7 +329,7 @@ describe "Parser" do
   end
 
   it "string literal expression" do
-    input = "\"hello world\";"
+    input = %("hello world";)
     program = create_program(input)
     count_statements(1, program)
     check_type_es(program.statements[0]) do |expression_statement|
@@ -364,7 +364,7 @@ describe "Parser" do
   end
 
   it "hash literal string keys" do
-    input = "{\"one\": 1, \"two\": 2, \"three\": 3}"
+    input = %({"one": 1, "two": 2, "three": 3})
     program = create_program(input)
     check_type_es(program.statements[0]) do |expression_statement|
       check_type_hl(expression_statement.expression?) do |hash_literal|
