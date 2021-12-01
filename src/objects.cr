@@ -1,4 +1,6 @@
 require "string_pool"
+require "./evaluator"
+require "./ast"
 
 macro define_type_desc
   def type_desc : String
@@ -8,10 +10,10 @@ end
 
 module Objects
   extend self
-
+  include Ast
   MNULL = MNull.new
 
-  POOL = StringPool.new
+  private POOL = StringPool.new
 
   enum HashType
     Integer
@@ -36,6 +38,7 @@ module Objects
   end
 
   abstract class MObject
+    abstract def type_desc : String
     abstract def inspect : String
 
     def if_not_error(& : MObject -> MObject?) : MObject?
@@ -46,8 +49,6 @@ module Objects
         return yield self
       end
     end
-
-    abstract def type_desc : String
   end
 
   abstract class MValue(T) < MObject
@@ -194,7 +195,7 @@ module Objects
     getter? body
     getter env
 
-    def initialize(@parameters : Array(Identifier)?, @body : BlockStatement?, @env : Environment)
+    def initialize(@parameters : Array(Identifier)?, @body : BlockStatement?, @env : Evaluator::Environment)
     end
 
     def inspect : String

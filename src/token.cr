@@ -79,7 +79,7 @@ module Tokens
 end
 
 class String
-  def lookup_ident : TokenType
-    KEYBOARDS[self]?.or_else(IDENT)
+  def lookup_ident : Tokens::TokenType
+    Tokens::KEYBOARDS[self]?.or_else(Tokens::IDENT)
   end
 end

@@ -1,4 +1,5 @@
 require "./objects"
+require "./ast"
 
 macro error_ret(e)
   if {{e}}.is_error?
@@ -6,19 +7,33 @@ macro error_ret(e)
   end
 end
 
+alias MObject = Objects::MObject
+alias MInteger = Objects::MInteger
+alias MBoolean = Objects::MBoolean
+alias MError = Objects::MError
+alias MString = Objects::MString
+alias MReturnValue = Objects::MReturnValue
+alias MFunction = Objects::MFunction
+alias MBuiltinFunction = Objects::MBuiltinFunction
+alias MArray = Objects::MArray
+alias MHash = Objects::MHash
+alias MValue = Objects::MValue
+alias HashKey = Objects::HashKey
+alias HashPair = Objects::HashPair
+
 module Evaluator
   extend self
-  include Objects
+  include Ast
 
-  NULL     = MNULL
+  NULL     = Objects::MNULL
   MTRUE    = MBoolean.new(true)
   MFALSE   = MBoolean.new(false)
   private BUILTINS = {
-    LEN_NAME   => LEN_BUILTIN,
-    PUSH_NAME  => PUSH_BUILTIN,
-    FIRST_NAME => FIRST_BUILTIN,
-    LAST_NAME  => LAST_BUILTIN,
-    REST_NAME  => REST_BUILTIN,
+    Objects::LEN_NAME   => Objects::LEN_BUILTIN,
+    Objects::PUSH_NAME  => Objects::PUSH_BUILTIN,
+    Objects::FIRST_NAME => Objects::FIRST_BUILTIN,
+    Objects::LAST_NAME  => Objects::LAST_BUILTIN,
+    Objects::REST_NAME  => Objects::REST_BUILTIN,
   }
 
   class Environment
@@ -367,14 +382,14 @@ module Evaluator
 end
 
 module Objects
-  class MObject
+  abstract class MObject
     def is_truthy? : Bool
       case self
-      when NULL
+      when Evaluator::NULL
         return false
-      when MTRUE
+      when Evaluator::MTRUE
         return true
-      when MFALSE
+      when Evaluator::MFALSE
         return false
       else
         return true
@@ -388,7 +403,7 @@ module Objects
 end
 
 struct Nil
-  def if_not_error(&body : MObject -> MObject?) : MObject?
+  def if_not_error(&body : Objects::MObject -> Objects::MObject?) : Objects::MObject?
     return self
   end
 
@@ -406,11 +421,11 @@ struct Nil
 end
 
 struct Bool
-  def to_monkey : MBoolean
+  def to_monkey : Objects::MBoolean
     if self
-      MTRUE
+      Evaluator::MTRUE
     else
-      MFALSE
+      Evaluator::MFALSE
     end
   end
 end

@@ -1,6 +1,7 @@
 require "./token"
 
 module Lexers
+  include Tokens
   WHITE_SPACES = [' ', '\t', '\n', '\r']
 
   class Lexer
