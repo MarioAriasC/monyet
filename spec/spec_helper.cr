@@ -4,9 +4,11 @@ require "../src/parser"
 require "../src/ast"
 require "../src/lexer"
 require "../src/evaluator"
+require "../src/symbols"
 include Parsers
 include Lexers
 include Evaluator
+include Symbols
 
 macro define_check_type(suffix, t)
   def check_type_{{suffix}}(value, &block : {{t}} -> _)
@@ -137,4 +139,15 @@ define_test_object s, MString, String
 
 def test_nil_object(obj : MObject?)
   obj.not_nil!.should eq(NULL)
+end
+
+def test_symbol(name : String, table : Symbols::SymbolTable, expected : Hash(String, Symbols::Symbol))
+  symbol = table.define(name)
+  expected_symbol = expected[name]
+  expected_symbol.should eq(symbol)
+end
+
+def test_symbol(table : Symbols::SymbolTable, sym : Symbols::Symbol)
+  result = table.resolve(sym.name)
+  result.should eq(sym)
 end
