@@ -18,10 +18,11 @@ module Symbols
   end
 
   class SymbolTable
-    @num_definitions = 0
+    property num_definitions : Int32 = 0
     @free_symbols = [] of Symbol
 
     getter free_symbols
+    getter outer
 
     def initialize(@store : Hash(String, Symbol) = {} of String => Symbol, @outer : SymbolTable? = nil)
     end

@@ -8,6 +8,18 @@ macro define_type_desc
   end
 end
 
+# macro clean(c)
+#  c.delete(%("))
+# end
+
+# macro int_operations
+#  {% for operation in {"+"} %}
+#    def {{operation.delete('"')}}(other : MInteger)
+#      return MInteger.new(@value {{operation.to_s}} other.value)
+#    end
+#  {% end%}
+# end
+
 module Objects
   extend self
   include Ast
@@ -74,6 +86,8 @@ module Objects
     def - : self
       return MInteger.new(-@value)
     end
+
+    # int_operations
 
     def +(other : MInteger)
       return MInteger.new(@value + other.value)
@@ -250,6 +264,21 @@ module Objects
     define_type_desc
   end
 
+  class MCompiledFunction < MObject
+    getter instructions
+    getter num_locals
+    getter num_parameters
+
+    def initialize(@instructions : Instructions, @num_locals = 0, @num_parameters = 0)
+    end
+
+    def inspect : String
+      return "CompiledFunction[#{self}]"
+    end
+
+    define_type_desc
+  end
+
   private def arg_size_check(expected_size : Int32, args : Array(MObject?), &body : BuiltinFunction) : MObject?
     length = args.size
     if length != expected_size
@@ -327,14 +356,30 @@ module Objects
     end
   end
 
+  private def mputs(args : Array(MObject?)) : MObject?
+    args.each { |arg| puts arg.nil? ? "null" : arg.inspect }
+    nil.as(MObject?)
+  end
+
   LEN_NAME      = "len"
   PUSH_NAME     = "push"
+  PUTS_NAME     = "puts"
   FIRST_NAME    = "first"
   LAST_NAME     = "last"
   REST_NAME     = "rest"
   LEN_BUILTIN   = MBuiltinFunction.new(->len(Array(MObject?)))
+  PUTS_BUILTIN  = MBuiltinFunction.new(->mputs(Array(MObject?)))
   PUSH_BUILTIN  = MBuiltinFunction.new(->push(Array(MObject?)))
   FIRST_BUILTIN = MBuiltinFunction.new(->first(Array(MObject?)))
   LAST_BUILTIN  = MBuiltinFunction.new(->last(Array(MObject?)))
   REST_BUILTIN  = MBuiltinFunction.new(->rest(Array(MObject?)))
+
+  BUILTINS = [
+    {LEN_NAME, LEN_BUILTIN},
+    {PUTS_NAME, PUTS_BUILTIN},
+    {FIRST_NAME, FIRST_BUILTIN},
+    {LAST_NAME, LAST_BUILTIN},
+    {REST_NAME, REST_BUILTIN},
+    {PUSH_NAME, PUSH_BUILTIN},
+  ]
 end

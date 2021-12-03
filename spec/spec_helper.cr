@@ -32,6 +32,12 @@ macro define_test_object(suffix, t, v)
   end
 end
 
+def parse(input : String) : Program
+  lexer = Lexer.new(input)
+  parser = Parser.new(lexer)
+  return parser.parse_program
+end
+
 def create_program(input : String) : Program
   lexer = Lexer.new(input)
   parser = Parser.new(lexer)
@@ -150,4 +156,74 @@ end
 def test_symbol(table : Symbols::SymbolTable, sym : Symbols::Symbol)
   result = table.resolve(sym.name)
   result.should eq(sym)
+end
+
+def test_instructions(expected : Array(Instructions), actual : Instructions)
+  concatenated = concat(expected)
+  concatenated.size.should eq(actual.size)
+  assert_instructions(concatenated, actual)
+end
+
+private def assert_instructions(expected : Instructions, actual : Instructions)
+  expected.each_with_index do |byte, i|
+    byte.should eq(actual[i])
+  end
+end
+
+def concat(instructions : Array(Instructions)) : Instructions
+  return instructions.sum
+end
+
+def test_compile_result(input : String, expected_constants : Array, expected_instructions : Array(Instructions))
+  program = parse(input)
+  compiler = MCompiler.new
+  compiler.compile(program)
+  bytecode = compiler.bytecode
+  test_instructions(expected_instructions, bytecode.instructions)
+  test_constants(expected_constants, bytecode.constants)
+end
+
+def test_constants(expected : Array, actual : Array(MObject))
+  # puts typeof(expected)
+  # puts "expected #{expected}"
+  # puts "actual #{actual}"
+  expected.size.should eq(actual.size)
+  expected.each_with_index do |constant, i|
+    case constant
+    when Int64
+      test_integer_object(constant, actual[i])
+    when String
+      test_string_object(constant, actual[i])
+    when Array
+      act = actual[i]
+      case act
+      when MCompiledFunction
+        test_instructions(constant.as(Array(Instructions)), act.instructions)
+      else
+        raise "constant #{act} - not a function, got #{act.type_desc}"
+      end
+    end
+  end
+end
+
+macro def_test_object(name, expected_type, actual_type)
+def test_{{name}}_object(expected : {{expected_type}}, actual : MObject)
+  case actual
+  when {{actual_type}}
+    expected.should eq(actual.value)
+  else
+    raise "object is not {{actual_type}}, got#{actual.type_desc}"
+  end
+end
+end
+
+def_test_object integer, Int64, MInteger
+def_test_object string, String, MString
+
+def test_scope_index_size(compiler : MCompiler, scope_index : Int32)
+  scope_index.should eq(compiler.scope_index)
+end
+
+def test_scope_instructions_size(compiler : MCompiler, instructions_size : Int32)
+  instructions_size.should eq(compiler.current_scope.instructions.size)
 end

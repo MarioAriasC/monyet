@@ -127,6 +127,10 @@ module Code
       ret_ins
     end
   end
+
+  def onset(ins : Instructions, i : Int32) : Instructions
+    return ins[0..(i - 1)]
+  end
 end
 
 class String

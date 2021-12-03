@@ -13,6 +13,9 @@ module Ast
   end
 
   abstract class Expression < Node
+    def <=>(other : Expression)
+      return "#{self}" <=> "#{other}"
+    end
   end
 
   module TokenHolder
@@ -70,7 +73,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "#{token_literal} #{@name} #{@value.or_else("")};"
+      io << "#{token_literal} #{@name} = #{@value.or_else("")};"
     end
   end
 
@@ -179,7 +182,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "if#{@condition} #{@consequence} #{@alternative ? "else #{@alternative}" : ""}"
+      io << "if(#{@condition}) #{@consequence} #{@alternative ? "else #{@alternative}" : ""}"
     end
   end
 
@@ -193,7 +196,7 @@ module Ast
     end
 
     def to_s(io)
-      io << "#{token_literal}#{@name.empty? ? "" : "<#{@name}>"}(#{@parameters.or_else([] of String).join(", ")}) #{@body}"
+      io << "#{token_literal}#{@name.empty? ? "" : "<#{@name}>"}(#{@parameters.or_else([] of String).join(", ")}) {#{@body}}"
     end
   end
 
