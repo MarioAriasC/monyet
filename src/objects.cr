@@ -61,6 +61,17 @@ module Objects
         return yield self
       end
     end
+
+    def is_truthy? : Bool
+      case self
+      when MBoolean
+        return self.value
+      when MNull
+        return false
+      else
+        return true
+      end
+    end
   end
 
   abstract class MValue(T) < MObject
@@ -274,6 +285,20 @@ module Objects
 
     def inspect : String
       return "CompiledFunction[#{self}]"
+    end
+
+    define_type_desc
+  end
+
+  class MClosure < MObject
+    getter fn
+    getter free
+
+    def initialize(@fn : MCompiledFunction, @free = [] of MObject)
+    end
+
+    def inspect : String
+      return "Closure[#{self}]"
     end
 
     define_type_desc

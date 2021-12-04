@@ -2,6 +2,7 @@ require "./objects"
 require "./evaluator"
 require "./parser"
 require "./lexer"
+require "./compiler"
 
 module Benchmarks
   extend self
@@ -41,6 +42,16 @@ fibonacci(35);)
     env = Environment.new
     measure("eval") do
       eval(parse(input), env).as(MInteger)
+    end
+  end
+
+  def vm(input : String)
+    compiler = Compilers::MCompiler.new
+    compiler.compile(parse(input))
+    machine = Vms::VM.new(compiler.bytecode)
+    measure("vm") do
+      machine.run
+      machine.last_popped_stack_elem.not_nil!
     end
   end
 

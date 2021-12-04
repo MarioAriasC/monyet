@@ -131,6 +131,41 @@ module Code
   def onset(ins : Instructions, i : Int32) : Instructions
     return ins[0..(i - 1)]
   end
+
+  def offset(ins : Instructions, i : Int32) : Instructions
+    return ins[i..(ins.size - 1)]
+  end
+
+  def read_int(ins : Instructions, i : Int32) : Int32
+    return read_u16(offset(ins, i)).to_i
+  end
+
+  def read_u16(ins : Instructions) : UInt16
+    ch1 = read(ins, 0)
+    ch2 = read(ins, 1)
+    if (ch1 | ch2) < 0
+      raise ""
+    else
+      return ((ch1 << 8) + (ch2 << 0)).to_u16
+    end
+  end
+
+  def read(ins : Instructions, position : Int32) : Int32
+    return (ins[position] & 255.to_u).to_i
+  end
+
+  def read_byte(ins : Instructions, i : Int32) : UInt8
+    return read_u8(offset(ins, i))
+  end
+
+  def read_u8(ins : Instructions) : UInt8
+    int = read(ins, 0)
+    if (int < 0)
+      raise "error reading byte"
+    else
+      return int.to_u8
+    end
+  end
 end
 
 class String

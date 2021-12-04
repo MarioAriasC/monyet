@@ -90,7 +90,7 @@ module Evaluator
         end
       end
     when BooleanLiteral
-      return node.value.to_monkey
+      return node.value.to_m
     when IfExpression
       return eval_if_expression(node, env)
     when BlockStatement
@@ -195,9 +195,9 @@ module Evaluator
     if left.is_a?(MInteger) && right.is_a?(MInteger)
       return eval_integer_infix_expression(operator, left, right)
     elsif operator == "=="
-      return (left == right).to_monkey
+      return (left == right).to_m
     elsif operator == "!="
-      return (left != right).to_monkey
+      return (left != right).to_m
     elsif left.type_desc != right.type_desc
       return MError.new("type mismatch: #{left.type_desc} #{operator} #{right.type_desc}")
     elsif left.is_a?(MString) && right.is_a?(MString)
@@ -218,13 +218,13 @@ module Evaluator
     when "/"
       return left / right
     when "<"
-      return (left < right).to_monkey
+      return (left < right).to_m
     when ">"
-      return (left > right).to_monkey
+      return (left > right).to_m
     when "=="
-      return (left == right).to_monkey
+      return (left == right).to_m
     when "!="
-      return (left != right).to_monkey
+      return (left != right).to_m
     else
       return MError.new("unknown operator: #{left.type_desc} #{operator} #{right.type_desc}")
     end
@@ -418,10 +418,14 @@ struct Nil
   def type_desc : String
     "nil"
   end
+
+  def is_truthy? : Bool
+    false
+  end
 end
 
 struct Bool
-  def to_monkey : Objects::MBoolean
+  def to_m : Objects::MBoolean
     if self
       Evaluator::MTRUE
     else

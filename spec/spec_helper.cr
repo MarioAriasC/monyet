@@ -5,10 +5,12 @@ require "../src/ast"
 require "../src/lexer"
 require "../src/evaluator"
 require "../src/symbols"
+require "../src/vm"
 include Parsers
 include Lexers
 include Evaluator
 include Symbols
+include Vms
 
 macro define_check_type(suffix, t)
   def check_type_{{suffix}}(value, &block : {{t}} -> _)
@@ -184,9 +186,6 @@ def test_compile_result(input : String, expected_constants : Array, expected_ins
 end
 
 def test_constants(expected : Array, actual : Array(MObject))
-  # puts typeof(expected)
-  # puts "expected #{expected}"
-  # puts "actual #{actual}"
   expected.size.should eq(actual.size)
   expected.each_with_index do |constant, i|
     case constant
@@ -219,6 +218,7 @@ end
 
 def_test_object integer, Int64, MInteger
 def_test_object string, String, MString
+def_test_object boolean, Bool, MBoolean
 
 def test_scope_index_size(compiler : MCompiler, scope_index : Int32)
   scope_index.should eq(compiler.scope_index)
@@ -226,4 +226,52 @@ end
 
 def test_scope_instructions_size(compiler : MCompiler, instructions_size : Int32)
   instructions_size.should eq(compiler.current_scope.instructions.size)
+end
+
+def test_vm_result(input : String, expected)
+  program = parse(input)
+  compiler = MCompiler.new
+  compiler.compile(program)
+  vm = VM.new(compiler.bytecode)
+  vm.run
+  stack_elem = vm.last_popped_stack_elem?.not_nil!
+  test_expected_object(expected, stack_elem)
+end
+
+def test_expected_object(expected, actual : MObject)
+  case expected
+  when Int64
+    test_integer_object(expected, actual)
+  when Bool
+    test_boolean_object(expected, actual)
+  when MNull
+    VM_NULL.should eq(actual)
+  when String
+    test_string_object(expected, actual)
+  when Array(Int64)
+    check_type_ar(actual) do |array|
+      array.elements.size.should eq(expected.size)
+      expected.each_with_index do |long, i|
+        test_integer_object(long, array.elements[i].not_nil!)
+      end
+      nil
+    end
+  when Hash(HashKey, Int64)
+    check_type_h(actual) do |hash|
+      expected.size.should eq(hash.pairs.size)
+      expected.each do |expected_key, expected_value|
+        pair = hash.pairs[expected_key]
+        pair.should_not be_nil
+        test_integer_object(expected_value, pair.value)
+      end
+      nil
+    end
+  when MError
+    check_type_error(actual) do |error|
+      error.message.should eq(expected.message)
+      nil
+    end
+  else
+    raise "test not implemented for #{typeof(expected)}"
+  end
 end

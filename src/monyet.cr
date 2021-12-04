@@ -23,5 +23,11 @@ module Monyet
     parser.on "--eval-fast", "Runs eval fast version" do
       Benchmarks.eval(Benchmarks::FAST_INPUT)
     end
+    parser.on "--vm", "Runs vm version" do
+      Benchmarks.vm(Benchmarks::SLOW_INPUT)
+    end
+    parser.on "--vm-fast", "Runs vm fast version" do
+      Benchmarks.vm(Benchmarks::FAST_INPUT)
+    end
   end
 end
