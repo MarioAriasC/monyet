@@ -10,7 +10,7 @@ include Parsers
 include Lexers
 include Evaluator
 include Symbols
-include Vms
+include Vm
 
 macro define_check_type(suffix, t)
   def check_type_{{suffix}}(value, &block : {{t}} -> _)

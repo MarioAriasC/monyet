@@ -3,11 +3,13 @@ require "./evaluator"
 require "./parser"
 require "./lexer"
 require "./compiler"
+require "./vm"
 
 module Benchmarks
   extend self
   include Objects
   include Evaluator
+  include Vm
   SLOW_INPUT = %(
 let fibonacci = fn(x) {
 	if (x == 0) {
@@ -48,10 +50,10 @@ fibonacci(35);)
   def vm(input : String)
     compiler = Compilers::MCompiler.new
     compiler.compile(parse(input))
-    machine = Vms::VM.new(compiler.bytecode)
+    machine = Vm::VM.new(compiler.bytecode)
     measure("vm") do
       machine.run
-      machine.last_popped_stack_elem.not_nil!
+      machine.last_popped_stack_elem?.not_nil!.as(MInteger)
     end
   end
 

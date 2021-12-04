@@ -1,5 +1,7 @@
 require "./objects"
 require "./code"
+require "./symbols"
+require "./ast"
 
 macro emit_end
   pos = add_instruction(ins)
@@ -11,7 +13,9 @@ module Compilers
   extend self
 
   # include Objects
-  # include Code
+  include Symbols
+  include Code
+  include Ast
   struct EmittedInstruction
     property op
     getter position
@@ -164,7 +168,7 @@ module Compilers
         instructions = leave_scope
         free_symbols.each { |symbol| load_symbol(symbol) }
 
-        compiled_fn = MCompiledFunction.new(instructions: instructions, num_locals: num_locals, num_parameters: node.parameters?.not_nil!.size)
+        compiled_fn = Objects::MCompiledFunction.new(instructions: instructions, num_locals: num_locals, num_parameters: node.parameters?.not_nil!.size)
         emit(Opcode::OpClosure, add_constant(compiled_fn), free_symbols.size)
       when ReturnStatement
         compile(node.return_value?.not_nil!)
@@ -192,12 +196,12 @@ module Compilers
     end
 
     def emit(op : Opcode) : Int32
-      ins = make(op)
+      ins = Code.make(op)
       emit_end
     end
 
     def emit(op : Opcode, *operands : Int32) : Int32
-      ins = make(op, *operands)
+      ins = Code.make(op, *operands)
       emit_end
     end
 
@@ -217,7 +221,7 @@ module Compilers
 
     private def replace_last_pop_with_return
       last_pos = current_scope.last_instruction.position
-      replace_instruction(last_pos, make(Opcode::OpReturnValue))
+      replace_instruction(last_pos, Code.make(Opcode::OpReturnValue))
       current_scope.last_instruction.op = Opcode::OpReturnValue
     end
 
@@ -232,7 +236,7 @@ module Compilers
       last = current_scope.last_instruction
       previous = current_scope.previous_instruction
       old = current_instructions
-      new = onset(old, last.position)
+      new = Code.onset(old, last.position)
       current_scope.instructions = new
       current_scope.last_instruction = previous
     end
@@ -259,7 +263,7 @@ module Compilers
 
     private def change_operand(op_pos : Int32, operand : Int32)
       op = current_instructions[op_pos]
-      new = make(Opcode.new(op.to_i), operand)
+      new = Code.make(Opcode.new(op.to_i), operand)
       replace_instruction(op_pos, new)
     end
 

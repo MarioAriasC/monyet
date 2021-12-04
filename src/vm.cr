@@ -1,15 +1,16 @@
 require "./code"
 require "./compiler"
+require "./objects"
 
 macro execute_build_and_push(col)
-  num_elements = read_int(ins, ip + 1)
+  num_elements = Code.read_int(ins, ip + 1)
   current_frame.ip += 2
   {{col}} = build_{{col}}(@sp - num_elements, @sp)
   @sp -= num_elements
   push({{col}})
 end
 
-module Vms
+module Vm
   extend self
   include Compilers
 
@@ -18,7 +19,7 @@ module Vms
     getter cl
     getter base_pointer
 
-    def initialize(@cl : MClosure, @base_pointer : Int32)
+    def initialize(@cl : Objects::MClosure, @base_pointer : Int32)
     end
 
     def instructions : Instructions
@@ -31,20 +32,20 @@ module Vms
 
   private VM_TRUE  = MBoolean.new(true)
   private VM_FALSE = MBoolean.new(false)
-  private VM_NULL  = MNULL
+  private VM_NULL  = Objects::MNULL
 
   class VM
     @constants = [] of MObject
     @stack = Array(MObject?).new(STACK_SIZE) { nil }
     @sp = 0
-    @frames = Array(Vms::Frame?).new(MAX_FRAME_SIZE) { nil }
+    @frames = Array(Vm::Frame?).new(MAX_FRAME_SIZE) { nil }
     @frame_index = 1
     @globals = [] of MObject
 
     def initialize(@bytecode : Bytecode)
       @constants = @bytecode.constants
-      main_fn = MCompiledFunction.new(@bytecode.instructions)
-      main_closure = MClosure.new(main_fn)
+      main_fn = Objects::MCompiledFunction.new(@bytecode.instructions)
+      main_closure = Objects::MClosure.new(main_fn)
       main_frame = Frame.new(main_closure, 0)
       @frames[0] = main_frame
     end
@@ -60,7 +61,7 @@ module Vms
         op = Opcode.new(ins[ip].to_i)
         case op
         when Opcode::OpConstant
-          const_index = read_int(ins, ip + 1)
+          const_index = Code.read_int(ins, ip + 1)
           current_frame.ip += 2
           push(@constants[const_index])
         when Opcode::OpPop
@@ -78,7 +79,7 @@ module Vms
         when Opcode::OpBang
           execute_bang_operator
         when Opcode::OpJumpNotTruthy
-          pos = read_int(ins, ip + 1)
+          pos = Code.read_int(ins, ip + 1)
           current_frame.ip += 2
           condition = pop
           if !condition.is_truthy?
@@ -87,10 +88,10 @@ module Vms
         when Opcode::OpNull
           push(VM_NULL)
         when Opcode::OpJump
-          pos = read_int(ins, ip + 1)
+          pos = Code.read_int(ins, ip + 1)
           current_frame.ip = pos - 1
         when Opcode::OpSetGlobal
-          global_index = read_int(ins, ip + 1)
+          global_index = Code.read_int(ins, ip + 1)
           current_frame.ip += 2
           if global_index == @globals.size
             @globals << pop.not_nil!
@@ -98,7 +99,7 @@ module Vms
             @globals[global_index] = pop.not_nil!
           end
         when Opcode::OpGetGlobal
-          global_index = read_int(ins, ip + 1)
+          global_index = Code.read_int(ins, ip + 1)
           current_frame.ip += 2
           push(@globals[global_index])
         when Opcode::OpArray
@@ -110,12 +111,12 @@ module Vms
           left = pop
           execute_index_expression(left.not_nil!, index.not_nil!)
         when Opcode::OpClosure
-          const_index = read_int(ins, ip + 1)
-          num_free = read_byte(ins, ip + 3)
+          const_index = Code.read_int(ins, ip + 1)
+          num_free = Code.read_byte(ins, ip + 3)
           current_frame.ip += 3
           push_closure(const_index, num_free.to_i)
         when Opcode::OpCall
-          num_args = read_byte(ins, ip + 1)
+          num_args = Code.read_byte(ins, ip + 1)
           current_frame.ip += 1
           execute_call(num_args.to_i)
         when Opcode::OpReturnValue
@@ -128,22 +129,22 @@ module Vms
           @sp = frame.base_pointer - 1
           push(VM_NULL)
         when Opcode::OpSetLocal
-          local_index = read_byte(ins, ip + 1)
+          local_index = Code.read_byte(ins, ip + 1)
           current_frame.ip += 1
           frame = current_frame
           @stack[frame.base_pointer + local_index.to_i] = pop
         when Opcode::OpGetLocal
-          local_index = read_byte(ins, ip + 1)
+          local_index = Code.read_byte(ins, ip + 1)
           current_frame.ip += 1
           frame = current_frame
           push(@stack[frame.base_pointer + local_index.to_i].not_nil!)
         when Opcode::OpGetBuiltin
-          built_index = read_byte(ins, ip + 1)
+          built_index = Code.read_byte(ins, ip + 1)
           current_frame.ip += 1
-          built = BUILTINS[built_index.to_i]
+          built = Objects::BUILTINS[built_index.to_i]
           push(built[1])
         when Opcode::OpGetFree
-          free_index = read_byte(ins, ip + 1)
+          free_index = Code.read_byte(ins, ip + 1)
           current_frame.ip += 1
           current_closure = current_frame.cl
           push(current_closure.free[free_index.to_i])
@@ -160,7 +161,7 @@ module Vms
       return @stack[@sp]?
     end
 
-    private def current_frame : Vms::Frame
+    private def current_frame : Vm::Frame
       return @frames[@frame_index - 1].not_nil!
     end
 
@@ -338,10 +339,10 @@ module Vms
 
     private def push_closure(const_index : Int32, num_free : Int32)
       constant = @constants[const_index]
-      if constant.is_a?(MCompiledFunction)
+      if constant.is_a?(Objects::MCompiledFunction)
         free = Array.new(num_free) { |i| @stack[@sp - num_free - i].not_nil! }
         @sp -= num_free
-        closure = MClosure.new(constant, free)
+        closure = Objects::MClosure.new(constant, free)
         push(closure)
       else
         raise VMException.new("not a function #{constant}")
@@ -351,16 +352,16 @@ module Vms
     private def execute_call(num_args : Int32)
       callee = @stack[@sp - 1 - num_args]
       case callee
-      when MClosure
+      when Objects::MClosure
         call_closure(callee, num_args)
-      when MBuiltinFunction
+      when Objects::MBuiltinFunction
         call_builtin(callee, num_args)
       else
         raise VMException.new("calling non-function or non-builtin")
       end
     end
 
-    private def call_closure(cl : MClosure, num_args : Int32)
+    private def call_closure(cl : Objects::MClosure, num_args : Int32)
       if cl.fn.num_parameters != num_args
         raise VMException.new("wrong number of arguments: want=#{cl.fn.num_parameters}, got=#{num_args}")
       end

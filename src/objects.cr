@@ -1,6 +1,7 @@
 require "string_pool"
 require "./evaluator"
 require "./ast"
+require "./code"
 
 macro define_type_desc
   def type_desc : String
@@ -23,6 +24,7 @@ end
 module Objects
   extend self
   include Ast
+
   MNULL = MNull.new
 
   private POOL = StringPool.new
@@ -280,7 +282,7 @@ module Objects
     getter num_locals
     getter num_parameters
 
-    def initialize(@instructions : Instructions, @num_locals = 0, @num_parameters = 0)
+    def initialize(@instructions : Code::Instructions, @num_locals = 0, @num_parameters = 0)
     end
 
     def inspect : String
