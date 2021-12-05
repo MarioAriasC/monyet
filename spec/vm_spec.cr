@@ -102,7 +102,7 @@ describe "VM" do
       {"[1, 2, 3]", [1, 2, 3]},
       {"[1 + 2, 3 * 4, 5 + 6]", [3, 12, 11]},
     ].each do |input, expected|
-      test_vm_result(input, expected.map { |i| i.to_i64 })
+      test_vm_result(input, expected.map(&.to_i64))
     end
   end
 
@@ -357,7 +357,7 @@ describe "VM" do
     ].each do |input, expected|
       case expected
       when Array(Int32)
-        expected = expected.map { |i| i.to_i64 }
+        expected = expected.map(&.to_i64)
       when Int32
         expected = expected.to_i64
       end

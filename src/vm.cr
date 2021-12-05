@@ -141,16 +141,14 @@ module Vm
         when Opcode::OpGetBuiltin
           built_index = Code.read_byte(ins, ip + 1)
           current_frame.ip += 1
-          built = Objects::BUILTINS[built_index.to_i]
-          push(built[1])
+          push(Objects::BUILTINS[built_index.to_i][1])
         when Opcode::OpGetFree
           free_index = Code.read_byte(ins, ip + 1)
           current_frame.ip += 1
           current_closure = current_frame.cl
           push(current_closure.free[free_index.to_i])
         when Opcode::OpCurrentClosure
-          current_closure = current_frame.cl
-          push(current_closure)
+          push(current_frame.cl)
         else
           raise VMException.new("Unsupported op #{op}")
         end
@@ -251,11 +249,11 @@ module Vm
       right_value = right.value
       case op
       when Opcode::OpEqual
-        push((left == right).to_m)
+        push((left_value == right_value).to_m)
       when Opcode::OpNotEqual
-        push((left != right).to_m)
+        push((left_value != right_value).to_m)
       when Opcode::OpGreaterThan
-        push((left > right).to_m)
+        push((left_value > right_value).to_m)
       else
         raise VMException.new("unkown operator #{op}")
       end
@@ -342,8 +340,7 @@ module Vm
       if constant.is_a?(Objects::MCompiledFunction)
         free = Array.new(num_free) { |i| @stack[@sp - num_free - i].not_nil! }
         @sp -= num_free
-        closure = Objects::MClosure.new(constant, free)
-        push(closure)
+        push(Objects::MClosure.new(constant, free))
       else
         raise VMException.new("not a function #{constant}")
       end

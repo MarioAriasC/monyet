@@ -54,7 +54,7 @@ describe "Compiler" do
         mak(OpPop),
       ]},
     ].each do |input, expected_constants, expected_instructions|
-      test_compile_result(input, expected_constants.map { |i| i.to_i64 }, expected_instructions)
+      test_compile_result(input, expected_constants.map(&.to_i64), expected_instructions)
     end
   end
 
@@ -110,7 +110,7 @@ describe "Compiler" do
         mak(OpPop),
       ]},
     ].each do |input, expected_constants, expected_instructions|
-      test_compile_result(input, expected_constants.map { |i| i.to_i64 }, expected_instructions)
+      test_compile_result(input, expected_constants.map(&.to_i64), expected_instructions)
     end
   end
 
@@ -141,7 +141,7 @@ describe "Compiler" do
        ],
       },
     ].each do |input, expected_constants, expected_instructions|
-      test_compile_result(input, expected_constants.map { |i| i.to_i64 }, expected_instructions)
+      test_compile_result(input, expected_constants.map(&.to_i64), expected_instructions)
     end
   end
 
@@ -168,7 +168,7 @@ describe "Compiler" do
         mak(OpPop),
       ]},
     ].each do |input, expected_constants, expected_instructions|
-      test_compile_result(input, expected_constants.map { |i| i.to_i64 }, expected_instructions)
+      test_compile_result(input, expected_constants.map(&.to_i64), expected_instructions)
     end
   end
 
@@ -225,7 +225,7 @@ describe "Compiler" do
         ],
       },
     ].each do |input, expected_constants, expected_instructions|
-      test_compile_result(input, expected_constants.map { |i| i.to_i64 }, expected_instructions)
+      test_compile_result(input, expected_constants.map(&.to_i64), expected_instructions)
     end
   end
 
@@ -268,7 +268,7 @@ describe "Compiler" do
         ],
       },
     ].each do |input, expected_constants, expected_instructions|
-      test_compile_result(input, expected_constants.map { |i| i.to_i64 }, expected_instructions)
+      test_compile_result(input, expected_constants.map(&.to_i64), expected_instructions)
     end
   end
 
@@ -304,7 +304,7 @@ describe "Compiler" do
         ],
       },
     ].each do |input, expected_constants, expected_instructions|
-      test_compile_result(input, expected_constants.map { |i| i.to_i64 }, expected_instructions)
+      test_compile_result(input, expected_constants.map(&.to_i64), expected_instructions)
     end
   end
 

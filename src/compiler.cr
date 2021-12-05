@@ -16,6 +16,7 @@ module Compilers
   include Symbols
   include Code
   include Ast
+
   struct EmittedInstruction
     property op
     getter position
@@ -137,7 +138,7 @@ module Compilers
         node.elements?.not_nil!.each { |element| compile(element.not_nil!) }
         emit(Opcode::OpArray, node.elements?.not_nil!.size)
       when HashLiteral
-        keys = node.pairs.keys.sort
+        keys = node.pairs.keys.sort!
         keys.each do |key|
           compile(key)
           compile(node.pairs[key])
@@ -166,7 +167,7 @@ module Compilers
         free_symbols = @symbol_table.free_symbols
         num_locals = @symbol_table.num_definitions
         instructions = leave_scope
-        free_symbols.each { |symbol| load_symbol(symbol) }
+        free_symbols.each { |s| load_symbol(s) }
 
         compiled_fn = Objects::MCompiledFunction.new(instructions: instructions, num_locals: num_locals, num_parameters: node.parameters?.not_nil!.size)
         emit(Opcode::OpClosure, add_constant(compiled_fn), free_symbols.size)

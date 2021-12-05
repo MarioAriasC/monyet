@@ -36,15 +36,16 @@ module Lexers
     end
 
     private def read_number : String
-      read_value { |ch| ch.number? }
+      read_value(&.number?)
     end
 
     private def read_identifier : String
-      read_value { |ch| ch.is_identifier? }
+      read_value(&.is_identifier?)
     end
 
     private def read_string : String
       start = @position + 1
+      # ameba:disable Style/WhileTrue
       while true
         read_char
         if @ch == '"' || @ch == Char::ZERO
@@ -81,7 +82,6 @@ module Lexers
 
     def next_token : Token
       skip_whitespace
-      read_next_char = true
       r = nil
       case @ch
       when '='

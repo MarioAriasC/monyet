@@ -4,6 +4,16 @@ macro ret_ins
   return [] of UInt8
 end
 
+macro cache_arrays(cache, v)
+  key = {ins, i}
+  cached_instruction = {{cache}}[key]?
+  if cached_instruction.nil?
+    cached_instruction = {{v}}
+    {{cache}}[key] = cached_instruction
+  end
+  return cached_instruction
+end
+
 module Code
   extend self
   enum Opcode
@@ -96,44 +106,43 @@ module Code
   end
 
   def make(op : Opcode, *operands : Int32) : Instructions
-    begin
-      definition = lookup(op)
-      instruction_length = definition.operands_widths.sum + 1
-      instruction = Instructions.new(instruction_length, 0)
-      instruction[0] = op.to_u8
-      offset = 1
-      operands.each_with_index do |operand, i|
-        width = definition.operands_widths[i]
-        case width
-        when 2
-          instruction[offset] = ((operand.to_u32 >> 8) & 255).to_u8
-          instruction[offset + 1] = ((operand.to_u32 >> 0) & 255).to_u8
-        when 1
-          instruction[offset] = operand.to_u8
-        end
-        offset += width
+    definition = lookup(op)
+    instruction_length = definition.operands_widths.sum + 1
+    instruction = Instructions.new(instruction_length, 0)
+    instruction[0] = op.to_u8
+    offset = 1
+    operands.each_with_index do |operand, i|
+      width = definition.operands_widths[i]
+      case width
+      when 2
+        instruction[offset] = ((operand.to_u32 >> 8) & 255).to_u8
+        instruction[offset + 1] = ((operand.to_u32 >> 0) & 255).to_u8
+      when 1
+        instruction[offset] = operand.to_u8
       end
-      return instruction
-    rescue ex
-      ret_ins
+      offset += width
     end
+    return instruction
+  rescue ex
+    ret_ins
   end
 
   def make(op : Opcode) : Instructions
-    begin
-      lookup(op)
-      return [op.to_u8]
-    rescue ex
-      ret_ins
-    end
+    lookup(op)
+    return [op.to_u8]
+  rescue ex
+    ret_ins
   end
 
+  private ONSET_CACHE  = {} of {Instructions, Int32} => Instructions
+  private OFFSET_CACHE = {} of {Instructions, Int32} => Instructions
+
   def onset(ins : Instructions, i : Int32) : Instructions
-    return ins[0..(i - 1)]
+    cache_arrays ONSET_CACHE, ins[0..(i - 1)]
   end
 
   def offset(ins : Instructions, i : Int32) : Instructions
-    return ins[i..(ins.size - 1)]
+    cache_arrays OFFSET_CACHE, ins[i...(ins.size)]
   end
 
   def read_int(ins : Instructions, i : Int32) : Int32
