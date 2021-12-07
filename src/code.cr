@@ -134,15 +134,42 @@ module Code
     ret_ins
   end
 
-  private ONSET_CACHE  = {} of {Instructions, Int32} => Instructions
-  private OFFSET_CACHE = {} of {Instructions, Int32} => Instructions
+  struct InstructionsCache
+    @base = {} of UInt64 => Array(Instructions?)
+
+    def []=(key : Tuple(Instructions, Int32), value : Instructions)
+      key_0 = key[0].object_id
+      inner = @base[key_0]?
+      if inner.nil?
+        inner = Array.new(key[0].size) { nil.as(Instructions?) }
+        @base[key_0] = inner
+      end
+      inner[key[1]] = value
+      #pp "-->"
+      #pp @base
+    end
+
+    def []?(key : Tuple(Instructions, Int32)) : Instructions?
+      inner = @base[key[0].object_id]?
+      if inner.nil?
+        return nil
+      else
+        return inner[key[1]]?
+      end
+    end
+  end
+
+  private ONSET_CACHE  = InstructionsCache.new
+  private OFFSET_CACHE = InstructionsCache.new
 
   def onset(ins : Instructions, i : Int32) : Instructions
     cache_arrays ONSET_CACHE, ins[0..(i - 1)]
+    #ins[0..(i - 1)]
   end
 
-  def offset(ins : Instructions, i : Int32) : Instructions
+  private def offset(ins : Instructions, i : Int32) : Instructions
     cache_arrays OFFSET_CACHE, ins[i...(ins.size)]
+    #ins[i...(ins.size)]
   end
 
   def read_int(ins : Instructions, i : Int32) : Int32
