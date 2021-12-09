@@ -45,8 +45,7 @@ module Lexers
 
     private def read_string : String
       start = @position + 1
-      # ameba:disable Style/WhileTrue
-      while true
+      loop do
         read_char
         if @ch == '"' || @ch == Char::ZERO
           break

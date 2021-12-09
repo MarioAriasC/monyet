@@ -176,7 +176,7 @@ module Code
     return read_u16(offset(ins, i)).to_i
   end
 
-  def read_u16(ins : Instructions) : UInt16
+  private def read_u16(ins : Instructions) : UInt16
     ch1 = read(ins, 0)
     ch2 = read(ins, 1)
     if (ch1 | ch2) < 0
@@ -186,7 +186,7 @@ module Code
     end
   end
 
-  def read(ins : Instructions, position : Int32) : Int32
+  private def read(ins : Instructions, position : Int32) : Int32
     return (ins[position] & 255.to_u).to_i
   end
 
@@ -194,7 +194,7 @@ module Code
     return read_u8(offset(ins, i))
   end
 
-  def read_u8(ins : Instructions) : UInt8
+  private def read_u8(ins : Instructions) : UInt8
     int = read(ins, 0)
     if (int < 0)
       raise "error reading byte"
