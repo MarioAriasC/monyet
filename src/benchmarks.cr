@@ -24,7 +24,10 @@ let fibonacci = fn(x) {
 };
 fibonacci(35);)
 
-  FAST_INPUT = %(
+  FAST_INPUT = fast_input(35)
+
+  def fast_input(size : Int32)
+    %(
 let fibonacci = fn(x) {
     if (x < 2) {
     	return x;
@@ -32,11 +35,12 @@ let fibonacci = fn(x) {
     	fibonacci(x - 1) + fibonacci(x - 2);
     }
 };
-fibonacci(35);)
+fibonacci(#{size});)
+  end
 
-  def crystal
+  def crystal(x : Int32)
     measure("crystal") do
-      fibonacci
+      fibonacci(x.to_i64)
     end
   end
 
@@ -79,7 +83,27 @@ fibonacci(35);)
     end
   end
 
-  private def fibonacci : MInteger
-    return MInteger.new(step(35))
+  private def fibonacci(x : Int64 = 35) : MInteger
+    return MInteger.new(step(x))
+  end
+
+  private def fast_fibonacci(x : Int64 = 35) : MInteger
+    return MInteger.new(fast_step(x))
+  end
+
+  private def fast_step(x : Int64) : Int64
+    if x < 2
+      return x
+    end
+
+    first = 0.to_i64
+    second = 1.to_i64
+    nth = 1.to_i64
+    (2...x).each do |_|
+      nth = first + second
+      first = second
+      second = nth
+    end
+    return nth.to_i64
   end
 end

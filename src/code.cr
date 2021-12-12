@@ -145,8 +145,8 @@ module Code
         @base[key_0] = inner
       end
       inner[key[1]] = value
-      #pp "-->"
-      #pp @base
+      # pp "-->"
+      # pp @base
     end
 
     def []?(key : Tuple(Instructions, Int32)) : Instructions?
@@ -164,12 +164,12 @@ module Code
 
   def onset(ins : Instructions, i : Int32) : Instructions
     cache_arrays ONSET_CACHE, ins[0..(i - 1)]
-    #ins[0..(i - 1)]
+    # ins[0..(i - 1)]
   end
 
-  private def offset(ins : Instructions, i : Int32) : OffsetArray
-    #cache_arrays OFFSET_CACHE, ins[i...(ins.size)]
-    #ins[i...(ins.size)]
+  private def offset(ins : Instructions, i : Int32) : OffsetArray | Instructions
+    # cache_arrays OFFSET_CACHE, ins[i...(ins.size)]
+    # ins[i...(ins.size)]
     return OffsetArray.new(ins, i)
   end
 
@@ -177,7 +177,7 @@ module Code
     return read_u16(offset(ins, i)).to_i
   end
 
-  private def read_u16(ins : OffsetArray) : UInt16
+  private def read_u16(ins : OffsetArray | Instructions) : UInt16
     ch1 = read(ins, 0)
     ch2 = read(ins, 1)
     if (ch1 | ch2) < 0
@@ -187,7 +187,7 @@ module Code
     end
   end
 
-  private def read(ins : OffsetArray, position : Int32) : Int32
+  private def read(ins : OffsetArray | Instructions, position : Int32) : Int32
     return (ins[position] & 255.to_u).to_i
   end
 
@@ -195,7 +195,7 @@ module Code
     return read_u8(offset(ins, i))
   end
 
-  private def read_u8(ins : OffsetArray) : UInt8
+  private def read_u8(ins : OffsetArray | Instructions) : UInt8
     int = read(ins, 0)
     if (int < 0)
       raise "error reading byte"

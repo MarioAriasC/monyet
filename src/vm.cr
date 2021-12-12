@@ -50,6 +50,11 @@ module Vm
       @frames[0] = main_frame
     end
 
+    def initialize(bytecode : Bytecode, globals : Array(MObject))
+      initialize(bytecode)
+      @globals = globals
+    end
+
     def run
       ip : Int32
       ins : Instructions

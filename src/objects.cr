@@ -384,7 +384,7 @@ module Objects
   end
 
   private def mputs(args : Array(MObject?)) : MObject?
-    args.each { |arg| puts arg.nil? ? "null" : arg.inspect }
+    args.each { |arg| puts(arg.nil? ? "null" : arg.inspect) }
     nil.as(MObject?)
   end
 
