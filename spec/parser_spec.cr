@@ -6,7 +6,7 @@ include Parsers
 macro test_branch(if_expression, branch_name, value)
   statements = {{if_expression}}.{{branch_name}}?.not_nil!.statements?.not_nil!
   statements.size.should eq(1)
-  check_type_es(statements[0]) do |statement|
+  Checks(ExpressionStatement).new.check_type(statements[0]) do |statement|
     test_identifier(statement.expression?, {{value}})
   end
 end
@@ -38,7 +38,7 @@ describe "Parser" do
       program = create_program(input)
       count_statements(1, program)
 
-      check_type_rt(program.statements[0]) do |return_statement|
+      Checks(ReturnStatement).new.check_type(program.statements[0]) do |return_statement|
         return_statement.token_literal.should eq("return")
         test_literal_expression(return_statement.return_value?, expected_value)
       end
@@ -50,8 +50,8 @@ describe "Parser" do
     program = create_program(input)
     count_statements(1, program)
 
-    check_type_es(program.statements[0]) do |expression_statement|
-      check_type_i(expression_statement.expression?) do |identifier|
+    Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+      Checks(Identifier).new.check_type(expression_statement.expression?) do |identifier|
         identifier.value.should eq("foobar")
         identifier.token_literal.should eq("foobar")
       end
@@ -63,7 +63,7 @@ describe "Parser" do
     program = create_program(input)
     count_statements(1, program)
 
-    check_type_es(program.statements[0]) do |expression_statement|
+    Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
       literal = expression_statement.expression?
       case literal
       when IntegerLiteral
@@ -85,8 +85,8 @@ describe "Parser" do
     ].each do |input, operator, value|
       program = create_program(input)
       count_statements(1, program)
-      check_type_es(program.statements[0]) do |expression_statement|
-        check_type_pe(expression_statement.expression?) do |prefix_expression|
+      Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+        Checks(PrefixExpression).new.check_type(expression_statement.expression?) do |prefix_expression|
           prefix_expression.operator.should eq(operator)
           test_literal_expression(prefix_expression.right?, value)
         end
@@ -110,7 +110,7 @@ describe "Parser" do
     ].each do |input, left_value, operator, right_value|
       program = create_program(input)
       count_statements(1, program)
-      check_type_es(program.statements[0]) do |expression_statement|
+      Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
         test_infix_expression(expression_statement.expression?, left_value, operator, right_value)
       end
     end
@@ -240,8 +240,8 @@ describe "Parser" do
     ].each do |input, expected_boolean|
       program = create_program(input)
       count_statements(1, program)
-      check_type_es(program.statements[0]) do |expression_statement|
-        check_type_bl(expression_statement.expression?) do |bool_literal|
+      Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+        Checks(BooleanLiteral).new.check_type(expression_statement.expression?) do |bool_literal|
           bool_literal.value.should eq(expected_boolean)
         end
       end
@@ -252,8 +252,8 @@ describe "Parser" do
     input = "if (x < y) { x }"
     program = create_program(input)
     count_statements(1, program)
-    check_type_es(program.statements[0]) do |expression_statement|
-      check_type_ife(expression_statement.expression?) do |if_expression|
+    Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+      Checks(IfExpression).new.check_type(expression_statement.expression?) do |if_expression|
         test_infix_expression(if_expression.condition?, "x", "<", "y")
         test_branch if_expression, consequence, "x"
         if_expression.alternative?.should eq(nil)
@@ -265,8 +265,8 @@ describe "Parser" do
     input = "if (x < y) { x } else { y }"
     program = create_program(input)
     count_statements(1, program)
-    check_type_es(program.statements[0]) do |expression_statement|
-      check_type_ife(expression_statement.expression?) do |if_expression|
+    Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+      Checks(IfExpression).new.check_type(expression_statement.expression?) do |if_expression|
         test_infix_expression(if_expression.condition?, "x", "<", "y")
         test_branch if_expression, consequence, "x"
         test_branch if_expression, alternative, "y"
@@ -277,8 +277,8 @@ describe "Parser" do
   it "function literal parsing" do
     input = "fn(x, y) { x + y;}"
     program = create_program(input)
-    check_type_es(program.statements[0]) do |expression_statement|
-      check_type_fl(expression_statement.expression?) do |function_literal|
+    Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+      Checks(FunctionLiteral).new.check_type(expression_statement.expression?) do |function_literal|
         parameters = function_literal.parameters?.not_nil!
         test_literal_expression(parameters[0], "x")
         test_literal_expression(parameters[1], "y")
@@ -286,7 +286,7 @@ describe "Parser" do
 
         statements = body.statements?.not_nil!
         statements.size.should eq(1)
-        check_type_es(statements[0]) do |statement|
+        Checks(ExpressionStatement).new.check_type(statements[0]) do |statement|
           test_infix_expression(statement.expression?, "x", "+", "y")
         end
       end
@@ -300,8 +300,8 @@ describe "Parser" do
       {"fn (x, y, z) {}", ["x", "y", "z"]},
     ].each do |input, expected_params|
       program = create_program(input)
-      check_type_es(program.statements[0]) do |expression_statement|
-        check_type_fl(expression_statement.expression?) do |function_literal|
+      Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+        Checks(FunctionLiteral).new.check_type(expression_statement.expression?) do |function_literal|
           parameters = function_literal.parameters?.not_nil!
           parameters.size.should eq(expected_params.size)
           expected_params.each_with_index do |expected_param, i|
@@ -316,8 +316,8 @@ describe "Parser" do
     input = "add(1, 2 * 3, 4+5)"
     program = create_program(input)
     count_statements(1, program)
-    check_type_es(program.statements[0]) do |expression_statement|
-      check_type_ce(expression_statement.expression?) do |call_expression|
+    Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+      Checks(CallExpression).new.check_type(expression_statement.expression?) do |call_expression|
         test_identifier(call_expression.function?, "add")
         arguments = call_expression.arguments?.not_nil!
 
@@ -332,8 +332,8 @@ describe "Parser" do
     input = %("hello world";)
     program = create_program(input)
     count_statements(1, program)
-    check_type_es(program.statements[0]) do |expression_statement|
-      check_type_sl(expression_statement.expression?) do |string_literal|
+    Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+      Checks(StringLiteral).new.check_type(expression_statement.expression?) do |string_literal|
         string_literal.value.should eq("hello world")
       end
     end
@@ -342,8 +342,8 @@ describe "Parser" do
   it "parsing literal array" do
     input = "[1, 2 * 2, 3 + 3]"
     program = create_program(input)
-    check_type_es(program.statements[0]) do |expression_statement|
-      check_type_al(expression_statement.expression?) do |array_literal|
+    Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+      Checks(ArrayLiteral).new.check_type(expression_statement.expression?) do |array_literal|
         elements = array_literal.elements?.not_nil!
         test_long_literal(elements[0], 1)
         test_infix_expression(elements[1], 2, "*", 2)
@@ -355,8 +355,8 @@ describe "Parser" do
   it "parsing index expression" do
     input = "myArray[1 + 1]"
     program = create_program(input)
-    check_type_es(program.statements[0]) do |expression_statement|
-      check_type_iex(expression_statement.expression?) do |index_expression|
+    Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+      Checks(IndexExpression).new.check_type(expression_statement.expression?) do |index_expression|
         test_identifier(index_expression.left?, "myArray")
         test_infix_expression(index_expression.index?, 1, "+", 1)
       end
@@ -366,12 +366,12 @@ describe "Parser" do
   it "hash literal string keys" do
     input = %({"one": 1, "two": 2, "three": 3})
     program = create_program(input)
-    check_type_es(program.statements[0]) do |expression_statement|
-      check_type_hl(expression_statement.expression?) do |hash_literal|
+    Checks(ExpressionStatement).new.check_type(program.statements[0]) do |expression_statement|
+      Checks(HashLiteral).new.check_type(expression_statement.expression?) do |hash_literal|
         hash_literal.pairs.size.should eq(3)
         expected = {"one" => 1, "two" => 2, "three" => 3}
         hash_literal.pairs.each do |key, value|
-          check_type_sl(key) do |key_literal|
+          Checks(StringLiteral).new.check_type(key) do |key_literal|
             expected_value = expected[key_literal.to_s]
             test_literal_expression(value, expected_value)
           end
@@ -383,8 +383,8 @@ describe "Parser" do
   it "function literal witn name" do
     input = "let myFunction = fn() {};"
     program = create_program(input)
-    check_type_lt(program.statements[0]) do |let_statement|
-      check_type_fl(let_statement.value?) do |function_literal|
+    Checks(LetStatement).new.check_type(program.statements[0]) do |let_statement|
+      Checks(FunctionLiteral).new.check_type(let_statement.value?) do |function_literal|
         function_literal.name.should eq("myFunction")
       end
     end

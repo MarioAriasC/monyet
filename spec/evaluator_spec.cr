@@ -5,12 +5,12 @@ include Evaluator
 
 macro test_integer
   evaluated = test_eval(input)
-  test_object_il(evaluated, expected.to_i64)
+  Tests(MInteger, Int64).new.test_object_value(evaluated, expected.to_i64)
 end
 
 macro test_boolean
   evaluated = test_eval(input)
-  test_object_bl(evaluated, expected)
+  Tests(MBoolean, Bool).new.test_object_value(evaluated, expected)
 end
 
 describe "Evaluator" do
@@ -87,7 +87,7 @@ describe "Evaluator" do
     ].each do |input, expected|
       evaluated = test_eval(input)
       if !expected.nil?
-        test_object_il(evaluated, expected.to_i64)
+        Tests(MInteger, Int64).new.test_object_value(evaluated, expected.to_i64)
       else
         test_nil_object(evaluated)
       end
@@ -167,7 +167,7 @@ describe "Evaluator" do
       },
     ].each do |input, expected|
       evaluated = test_eval(input)
-      check_type_error(evaluated) do |error|
+      Checks(MError).new.check_type(evaluated) do |error|
         error.message.should eq(expected)
       end
     end
@@ -187,7 +187,7 @@ describe "Evaluator" do
   it "function object" do
     input = "fn(x) { x + 2; };"
     evaluated = test_eval(input)
-    check_type_fn(evaluated) do |fn|
+    Checks(MFunction).new.check_type(evaluated) do |fn|
       parameters = fn.parameters?.not_nil!
       parameters.size.should eq(1)
       parameters[0].to_s.should eq("x")
@@ -220,15 +220,15 @@ describe "Evaluator" do
           };
 
           ourFunction(20) + first + second;"
-    test_object_il(test_eval(input), 70.to_i64)
+    Tests(MInteger, Int64).new.test_object_value(test_eval(input), 70.to_i64)
   end
 
   it "string literal" do
-    test_object_s(test_eval(%("Hello World!")), "Hello World!")
+    Tests(MString, String).new.test_object_value(test_eval(%("Hello World!")), "Hello World!")
   end
 
   it "string concatenation" do
-    test_object_s(test_eval(%("Hello" + " " + "World!")), "Hello World!")
+    Tests(MString, String).new.test_object_value(test_eval(%("Hello" + " " + "World!")), "Hello World!")
   end
 
   it "builtin functions" do
@@ -256,16 +256,16 @@ describe "Evaluator" do
       when Nil
         test_nil_object(evaluated)
       when Int32
-        test_object_il(evaluated, expected.to_i64)
+        Tests(MInteger, Int64).new.test_object_value(evaluated, expected.to_i64)
       when String
-        check_type_error(evaluated) do |error|
+        Checks(MError).new.check_type(evaluated) do |error|
           error.message.should eq(expected)
         end
       when Array(Int32)
-        check_type_ar(evaluated) do |array|
+        Checks(MArray).new.check_type(evaluated) do |array|
           expected.size.should eq(array.elements.size)
           expected.each_with_index do |element, i|
-            test_object_il(array.elements[i], element.to_i64)
+            Tests(MInteger, Int64).new.test_object_value(array.elements[i], element.to_i64)
           end
         end
       end
@@ -277,7 +277,7 @@ describe "Evaluator" do
     result = evaluated.as(MArray)
     result.elements.size.should eq(3)
     [1, 4, 6].each_with_index do |v, i|
-      test_object_il(result.elements[i], v.to_i64)
+      Tests(MInteger, Int64).new.test_object_value(result.elements[i], v.to_i64)
     end
   end
 
@@ -327,7 +327,7 @@ describe "Evaluator" do
       evaluated = test_eval(input)
       case expected
       when Int32
-        test_object_il(evaluated, expected.to_i64)
+        Tests(MInteger, Int64).new.test_object_value(evaluated, expected.to_i64)
       else
         test_nil_object(evaluated)
       end
@@ -346,7 +346,7 @@ describe "Evaluator" do
       		false: 6
       	})
     evaluated = test_eval(input)
-    check_type_h(evaluated) do |result|
+    Checks(MHash).new.check_type(evaluated) do |result|
       expected = {
         MString.new("one").hash_key   => 1,
         MString.new("two").hash_key   => 2,
@@ -359,7 +359,7 @@ describe "Evaluator" do
       expected.each do |expected_key, expected_value|
         pair = result.pairs[expected_key]?
         pair.should_not be_nil
-        test_object_il(pair.not_nil!.value, expected_value.to_i64)
+        Tests(MInteger, Int64).new.test_object_value(pair.not_nil!.value, expected_value.to_i64)
       end
     end
   end
@@ -377,7 +377,7 @@ describe "Evaluator" do
       evaluated = test_eval(input)
       case expected
       when Int32
-        test_object_il(evaluated, expected.to_i64)
+        Tests(MInteger, Int64).new.test_object_value(evaluated, expected.to_i64)
       else
         test_nil_object(evaluated)
       end
