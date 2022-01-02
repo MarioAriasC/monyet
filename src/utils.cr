@@ -10,8 +10,8 @@ class Object
     end
   end
 
-  def also(&block : self | Nil -> _) : self
-    block.call(self)
+  def also(& : self | Nil -> _) : self
+    yield self
     return self
   end
 end

@@ -12,14 +12,12 @@ include Evaluator
 include Symbols
 include Vm
 
-struct Checks(T)
-  def check_type(value, &block : T -> _)
-    case value
-    when T
-      block.call(value)
-    else
-      raise "Value is not #{T}, got=#{typeof(value)}"
-    end
+def check_type(type : T.class, value, & : T -> _) forall T
+  case value
+  when T
+    yield value
+  else
+    raise "Value is not #{T}, got=#{typeof(value)}"
   end
 end
 
@@ -51,7 +49,7 @@ end
 def test_let_statement(statement : Statement, expected_identifier : String)
   statement.token_literal.should eq("let")
 
-  Checks(LetStatement).new.check_type(statement) do |let_statement|
+  check_type(LetStatement, statement) do |let_statement|
     name = let_statement.name
     name.value.should eq(expected_identifier)
     name.token_literal.should eq(expected_identifier)
@@ -74,7 +72,7 @@ def test_literal_expression(value : Expression?, expected_value : T) forall T
 end
 
 def test_identifier(expression : Expression?, string : String)
-  Checks(Identifier).new.check_type(expression) do |exp|
+  check_type(Identifier, expression) do |exp|
     exp.value.should eq(string)
     exp.token_literal.should eq(string)
   end
@@ -86,19 +84,19 @@ macro test_literal(exp, v)
 end
 
 def test_boolean_literal(expression : Expression?, b : Bool)
-  Checks(BooleanLiteral).new.check_type(expression) do |exp|
+  check_type(BooleanLiteral, expression) do |exp|
     test_literal(exp, b)
   end
 end
 
 def test_long_literal(expression : Expression?, l : Int64)
-  Checks(IntegerLiteral).new.check_type(expression) do |exp|
+  check_type(IntegerLiteral, expression) do |exp|
     test_literal(exp, l)
   end
 end
 
 def test_infix_expression(expression : Expression?, left_value, operator : String, right_value)
-  Checks(InfixExpression).new.check_type(expression) do |infix_expression|
+  check_type(InfixExpression, expression) do |infix_expression|
     test_literal_expression(infix_expression.left?, left_value)
     infix_expression.operator.should eq(operator)
     test_literal_expression(infix_expression.right?, right_value)
@@ -219,7 +217,7 @@ def test_expected_object(expected, actual : MObject)
   when String
     Tests(String, MString).new.test_value_object(expected, actual)
   when Array(Int64)
-    Checks(MArray).new.check_type(actual) do |array|
+    check_type(MArray, actual) do |array|
       array.elements.size.should eq(expected.size)
       expected.each_with_index do |long, i|
         Tests(Int64, MInteger).new.test_value_object(long, array.elements[i].not_nil!)
@@ -227,7 +225,7 @@ def test_expected_object(expected, actual : MObject)
       nil
     end
   when Hash(HashKey, Int64)
-    Checks(MHash).new.check_type(actual) do |hash|
+    check_type(MHash, actual) do |hash|
       expected.size.should eq(hash.pairs.size)
       expected.each do |expected_key, expected_value|
         pair = hash.pairs[expected_key]
@@ -237,7 +235,7 @@ def test_expected_object(expected, actual : MObject)
       nil
     end
   when MError
-    Checks(MError).new.check_type(actual) do |error|
+    check_type(MError, actual) do |error|
       error.message.should eq(expected.message)
       nil
     end

@@ -362,16 +362,16 @@ module Parsers
     end
 
     private def peek_token_is?(type : TokenType) : Bool
-      return @peek_token.type == type
+      @peek_token.type == type
     end
 
     private def expect_peek?(type : TokenType) : Bool
       if peek_token_is?(type)
         next_token
-        return true
+        true
       else
         peek_error(type)
-        return false
+        false
       end
     end
 
@@ -379,16 +379,16 @@ module Parsers
       @errors << "Expected next token to be #{type}, got #{@peek_token.type} instead"
     end
 
-    private def cur_precedence
-      return find_precedence(@cur_token.type)
+    private def cur_precedence : Precedence
+      find_precedence(@cur_token.type)
     end
 
     private def peek_precedence : Precedence
-      return find_precedence(@peek_token.type)
+      find_precedence(@peek_token.type)
     end
 
     private def find_precedence(token_type : TokenType) : Precedence
-      return PRECEDENCES[token_type]?.or_else(Precedence::Lowest)
+      PRECEDENCES[token_type]?.or_else(Precedence::Lowest)
     end
   end
 end

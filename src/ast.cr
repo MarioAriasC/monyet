@@ -14,7 +14,7 @@ module Ast
 
   abstract class Expression < Node
     def <=>(other : Expression)
-      return "#{self}" <=> "#{other}"
+      "#{self}" <=> "#{other}"
     end
   end
 
@@ -40,9 +40,9 @@ module Ast
 
     def token_literal : String
       if @statements.empty
-        return ""
+        ""
       else
-        return @statements.first(1).token_literal
+        @statements.first(1).token_literal
       end
     end
 

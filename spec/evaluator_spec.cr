@@ -167,7 +167,7 @@ describe "Evaluator" do
       },
     ].each do |input, expected|
       evaluated = test_eval(input)
-      Checks(MError).new.check_type(evaluated) do |error|
+      check_type(MError, evaluated) do |error|
         error.message.should eq(expected)
       end
     end
@@ -187,7 +187,7 @@ describe "Evaluator" do
   it "function object" do
     input = "fn(x) { x + 2; };"
     evaluated = test_eval(input)
-    Checks(MFunction).new.check_type(evaluated) do |fn|
+    check_type(MFunction, evaluated) do |fn|
       parameters = fn.parameters?.not_nil!
       parameters.size.should eq(1)
       parameters[0].to_s.should eq("x")
@@ -258,11 +258,11 @@ describe "Evaluator" do
       when Int32
         Tests(MInteger, Int64).new.test_object_value(evaluated, expected.to_i64)
       when String
-        Checks(MError).new.check_type(evaluated) do |error|
+        check_type(MError, evaluated) do |error|
           error.message.should eq(expected)
         end
       when Array(Int32)
-        Checks(MArray).new.check_type(evaluated) do |array|
+        check_type(MArray, evaluated) do |array|
           expected.size.should eq(array.elements.size)
           expected.each_with_index do |element, i|
             Tests(MInteger, Int64).new.test_object_value(array.elements[i], element.to_i64)
@@ -346,7 +346,7 @@ describe "Evaluator" do
       		false: 6
       	})
     evaluated = test_eval(input)
-    Checks(MHash).new.check_type(evaluated) do |result|
+    check_type(MHash, evaluated) do |result|
       expected = {
         MString.new("one").hash_key   => 1,
         MString.new("two").hash_key   => 2,
