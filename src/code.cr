@@ -135,6 +135,7 @@ module Code
   end
 
   struct InstructionsCache
+    # A two level cache
     @base = {} of UInt64 => Array(Instructions?)
 
     def []=(key : Tuple(Instructions, Int32), value : Instructions)
@@ -145,8 +146,6 @@ module Code
         @base[key_0] = inner
       end
       inner[key[1]] = value
-      # pp "-->"
-      # pp @base
     end
 
     def []?(key : Tuple(Instructions, Int32)) : Instructions?
@@ -163,14 +162,23 @@ module Code
   private OFFSET_CACHE = InstructionsCache.new
 
   def onset(ins : Instructions, i : Int32) : Instructions
-    cache_arrays ONSET_CACHE, ins[0..(i - 1)]
-    # ins[0..(i - 1)]
+    {% if !flag?(:no_opt) %}
+      cache_arrays ONSET_CACHE, ins[0..(i - 1)]
+    {% else %}
+      ins[0..(i - 1)]
+    {% end %}
   end
 
   private def offset(ins : Instructions, i : Int32) : OffsetArray | Instructions
-    # cache_arrays OFFSET_CACHE, ins[i...(ins.size)]
-    # ins[i...(ins.size)]
-    return OffsetArray.new(ins, i)
+    {% if !flag?(:no_opt) %}
+      {% if !flag?(:cache) %}
+        OffsetArray.new(ins, i)
+      {% else %}
+        cache_arrays OFFSET_CACHE, ins[i...(ins.size)]
+      {% end %}
+    {% else %}
+      ins[i...(ins.size)]
+    {% end %}
   end
 
   def read_int(ins : Instructions, i : Int32) : Int32
