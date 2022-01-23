@@ -169,10 +169,16 @@ module Code
     {% end %}
   end
 
-  private def offset(ins : Instructions, i : Int32) : OffsetArray | Instructions
+  alias MBytes = OffsetArray | Instructions | Bytes
+
+  private def offset(ins : Instructions, i : Int32) : MBytes
     {% if !flag?(:no_opt) %}
       {% if !flag?(:cache) %}
-        OffsetArray.new(ins, i)
+        {% if !flag?(:slices)%}
+          OffsetArray.new(ins, i)
+        {% else %}
+          offset_slice(ins, i)
+        {% end %}
       {% else %}
         cache_arrays OFFSET_CACHE, ins[i...(ins.size)]
       {% end %}
@@ -181,11 +187,17 @@ module Code
     {% end %}
   end
 
+  private def offset_slice(ins : Instructions, i : Int32) : Bytes
+    # ptr = Pointer.malloc(ins.size - i){|j| ins[i + j]}
+    # return Slice.new(ptr, ins.size - i)
+    Slice.new(ins.size - i){|j| ins[i + j]}
+  end
+
   def read_int(ins : Instructions, i : Int32) : Int32
     return read_u16(offset(ins, i)).to_i
   end
 
-  private def read_u16(ins : OffsetArray | Instructions) : UInt16
+  private def read_u16(ins : MBytes) : UInt16
     ch1 = read(ins, 0)
     ch2 = read(ins, 1)
     if (ch1 | ch2) < 0
@@ -195,7 +207,7 @@ module Code
     end
   end
 
-  private def read(ins : OffsetArray | Instructions, position : Int32) : Int32
+  private def read(ins : MBytes, position : Int32) : Int32
     return (ins[position] & 255.to_u).to_i
   end
 
@@ -203,7 +215,7 @@ module Code
     return read_u8(offset(ins, i))
   end
 
-  private def read_u8(ins : OffsetArray | Instructions) : UInt8
+  private def read_u8(ins : MBytes) : UInt8
     int = read(ins, 0)
     if (int < 0)
       raise "error reading byte"
