@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-#crystal spec --verbose --define=slice
-crystal spec --verbose
+crystal spec --verbose --define=slice
+#crystal spec --verbose

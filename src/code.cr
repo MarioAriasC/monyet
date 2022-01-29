@@ -1,11 +1,11 @@
 macro ret_ins
   puts typeof(ex)
   puts ex.message
-  {% if flag?(:slice)%}
+  {% if flag?(:slice) %}
   return Instructions.empty
   {% else %}
   return [] of UInt8
-  {% end%}
+  {% end %}
 end
 
 module Code
@@ -89,10 +89,11 @@ module Code
   }
 
   {% if flag?(:slice) %}
-  alias Instructions = Bytes
+    alias Instructions = Bytes
   {% else %}
-  alias Instructions = Array(UInt8)
-  {% end%}
+    alias Instructions = Array(UInt8)
+  {% end %}
+
   def lookup(op : Opcode) : Definition
     definition = DEFINITIONS[op]
     if !definition.nil?
@@ -127,26 +128,22 @@ module Code
   def make(op : Opcode) : Instructions
     lookup(op)
     {% if flag?(:slice) %}
-    return Instructions[op.to_u8]
+      return Instructions[op.to_u8]
     {% else %}
-    return [op.to_u8]
+      return [op.to_u8]
     {% end %}
   rescue ex
     ret_ins
   end
 
   def onset(ins : Instructions, i : Int32) : Instructions
-      ins[0..(i - 1)]
+    ins[0..(i - 1)]
   end
 
-  alias MBytes = OffsetArray | Instructions | Bytes
+  alias MBytes = OffsetArray | Instructions
 
   private def offset(ins : Instructions, i : Int32) : MBytes
-    {% if flag?(:slice) %}
-      ins[i...(ins.size)]
-    {% else %}
-      OffsetArray.new(ins, i)
-    {% end %}
+    OffsetArray.new(ins, i)
   end
 
   def read_int(ins : Instructions, i : Int32) : Int32
