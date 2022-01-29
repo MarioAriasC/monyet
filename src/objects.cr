@@ -3,12 +3,6 @@ require "./evaluator"
 require "./ast"
 require "./code"
 
-macro define_type_desc
-  def type_desc : String
-    return {{ @type.stringify }}
-  end
-end
-
 # macro clean(c)
 #  c.delete(%("))
 # end
@@ -52,7 +46,10 @@ module Objects
   end
 
   abstract class MObject
-    abstract def type_desc : String
+    def type_desc : String
+      return {{ @type.stringify }}
+    end
+
     abstract def inspect : String
 
     def if_not_error(& : MObject -> MObject?) : MObject?
@@ -130,8 +127,6 @@ module Objects
       return @value == other.value
     end
 
-    define_type_desc
-
     def hash_key : HashKey
       return HashKey.new(hash_type, @value.to_u64)
     end
@@ -146,8 +141,6 @@ module Objects
     def inspect : String
       return @value.inspect
     end
-
-    define_type_desc
   end
 
   class MError < MObject
@@ -163,16 +156,12 @@ module Objects
     def to_s(io)
       io << "MError(message=#{@message})"
     end
-
-    define_type_desc
   end
 
   class MNull < MObject
     def inspect : String
       return "null"
     end
-
-    define_type_desc
   end
 
   class MBoolean < MValue(Bool)
@@ -193,8 +182,6 @@ module Objects
     #  @value.object_id
     # end
 
-    define_type_desc
-
     def hash_key : HashKey
       return HashKey.new(hash_type, (@value ? 1 : 0).to_u64)
     end
@@ -208,8 +195,6 @@ module Objects
     def hash_type : HashType
       return HashType::String
     end
-
-    define_type_desc
 
     def hash_key : HashKey
       @value = POOL.get(@value)
@@ -232,8 +217,6 @@ module Objects
       end
       return "fn(#{parameters}) {\n\t#{@body}\n}"
     end
-
-    define_type_desc
   end
 
   alias BuiltinFunction = Array(MObject?) -> MObject?
@@ -247,8 +230,6 @@ module Objects
     def inspect : String
       return "builtin function"
     end
-
-    define_type_desc
   end
 
   class MArray < MObject
@@ -260,8 +241,6 @@ module Objects
     def inspect : String
       return "[#{elements.join(", ")}]"
     end
-
-    define_type_desc
   end
 
   class MHash < MObject
@@ -273,8 +252,6 @@ module Objects
     def inspect : String
       return "{#{@pairs.values.map { |pair| "#{pair.key.inspect}: #{pair.value.inspect}" }}}"
     end
-
-    define_type_desc
   end
 
   class MCompiledFunction < MObject
@@ -288,8 +265,6 @@ module Objects
     def inspect : String
       return "CompiledFunction[#{self}]"
     end
-
-    define_type_desc
   end
 
   class MClosure < MObject
@@ -302,8 +277,6 @@ module Objects
     def inspect : String
       return "Closure[#{self}]"
     end
-
-    define_type_desc
   end
 
   private def arg_size_check(expected_size : Int32, args : Array(MObject?), &body : BuiltinFunction) : MObject?
