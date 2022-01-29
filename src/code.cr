@@ -1,18 +1,12 @@
 macro ret_ins
   puts typeof(ex)
   puts ex.message
+  {% if flag?(:slice)%}
   return Instructions.empty
+  {% else %}
+  return [] of UInt8
+  {% end%}
 end
-
-# macro cache_arrays(cache, v)
-#   key = {ins, i}
-#   cached_instruction = {{cache}}[key]?
-#   if cached_instruction.nil?
-#     cached_instruction = {{v}}
-#     {{cache}}[key] = cached_instruction
-#   end
-#   return cached_instruction
-# end
 
 module Code
   extend self
@@ -94,8 +88,11 @@ module Code
     Opcode::OpCurrentClosure => "OpCurrentClosure".to_definition,
   }
 
+  {% if flag?(:slice) %}
   alias Instructions = Bytes
-
+  {% else %}
+  alias Instructions = Array(UInt8)
+  {% end%}
   def lookup(op : Opcode) : Definition
     definition = DEFINITIONS[op]
     if !definition.nil?
@@ -129,68 +126,27 @@ module Code
 
   def make(op : Opcode) : Instructions
     lookup(op)
+    {% if flag?(:slice) %}
     return Instructions[op.to_u8]
+    {% else %}
+    return [op.to_u8]
+    {% end %}
   rescue ex
     ret_ins
   end
 
-  # struct InstructionsCache
-  #   # A two level cache
-  #   @base = {} of UInt64 => Array(Instructions?)
-  #
-  #   def []=(key : Tuple(Instructions, Int32), value : Instructions)
-  #     key_0 = key[0].object_id
-  #     inner = @base[key_0]?
-  #     if inner.nil?
-  #       inner = Array.new(key[0].size) { nil.as(Instructions?) }
-  #       @base[key_0] = inner
-  #     end
-  #     inner[key[1]] = value
-  #   end
-  #
-  #   def []?(key : Tuple(Instructions, Int32)) : Instructions?
-  #     inner = @base[key[0].object_id]?
-  #     if inner.nil?
-  #       return nil
-  #     else
-  #       return inner[key[1]]?
-  #     end
-  #   end
-  # end
-  #
-  # private ONSET_CACHE  = InstructionsCache.new
-  # private OFFSET_CACHE = InstructionsCache.new
-
   def onset(ins : Instructions, i : Int32) : Instructions
-    # {% if !flag?(:no_opt) %}
-    #   cache_arrays ONSET_CACHE, ins[0..(i - 1)]
-    # {% else %}
       ins[0..(i - 1)]
-    # {% end %}
   end
 
   alias MBytes = OffsetArray | Instructions | Bytes
 
   private def offset(ins : Instructions, i : Int32) : MBytes
-    # {% if !flag?(:no_opt) %}
-    #   {% if !flag?(:cache) %}
-    #     {% if !flag?(:slices)%}
-    #       OffsetArray.new(ins, i)
-    #     {% else %}
-    #       offset_slice(ins, i)
-    #     {% end %}
-    #   {% else %}
-    #     cache_arrays OFFSET_CACHE, ins[i...(ins.size)]
-    #   {% end %}
-    # {% else %}
+    {% if flag?(:slice) %}
       ins[i...(ins.size)]
-    # {% end %}
-  end
-
-  private def offset_slice(ins : Instructions, i : Int32) : Bytes
-    # ptr = Pointer.malloc(ins.size - i){|j| ins[i + j]}
-    # return Slice.new(ptr, ins.size - i)
-    Slice.new(ins.size - i){|j| ins[i + j]}
+    {% else %}
+      OffsetArray.new(ins, i)
+    {% end %}
   end
 
   def read_int(ins : Instructions, i : Int32) : Int32

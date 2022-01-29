@@ -136,11 +136,15 @@ private def assert_instructions(expected : Instructions, actual : Instructions)
 end
 
 def concat(instructions : Array(Instructions)) : Instructions
+{% if flag?(:slice) %}
   mem = IO::Memory.new
   instructions.each do |ins|
     mem.write(ins)
   end
   return mem.to_slice
+{% else %}
+  return instructions.sum
+{% end %}
 end
 
 def test_compile_result(input : String, expected_constants : Array, expected_instructions : Array(Instructions))
