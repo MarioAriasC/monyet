@@ -143,7 +143,11 @@ module Code
   alias MBytes = OffsetArray | Instructions
 
   private def offset(ins : Instructions, i : Int32) : MBytes
-    OffsetArray.new(ins, i)
+    {% if flag?(:slice) %}
+      ins[i...(ins.size)]
+    {% else %}
+      OffsetArray.new(ins, i)
+    {% end %}
   end
 
   def read_int(ins : Instructions, i : Int32) : Int32
