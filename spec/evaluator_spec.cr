@@ -195,7 +195,7 @@ describe "Evaluator" do
     end
   end
 
-  it "funciton application" do
+  it "function application" do
     [
       {"let identity = fn(x) { x; }; identity(5);", 5},
       {"let identity = fn(x) { return x; }; identity(5);", 5},
@@ -366,7 +366,7 @@ describe "Evaluator" do
 
   it "hash index expressions" do
     [
-      { %({"foo": 5}["foo"]), 5 },
+      { %({"foo": 5, "bar": 7}["foo"]), 5 },
       { %({"foo": 5}["bar"]), nil },
       { %(let key = "foo";{"foo": 5}[key]), 5 },
       { %({}["foo"]), nil },

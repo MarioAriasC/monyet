@@ -8,9 +8,9 @@ require "./code"
 # end
 
 # macro int_operations
-#  {% for operation in {"+"} %}
-#    def {{operation.delete('"')}}(other : MInteger)
-#      return MInteger.new(@value {{operation.to_s}} other.value)
+#  {% for operation in [+] %}
+#    def {{operation}}(other : MInteger)
+#      return MInteger.new(@value {{operation}} other.value)
 #    end
 #  {% end%}
 # end

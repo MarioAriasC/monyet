@@ -29,11 +29,11 @@ module Evaluator
   MTRUE    = MBoolean.new(true)
   MFALSE   = MBoolean.new(false)
   private BUILTINS = {
-    Objects::LEN_NAME   => Objects::LEN_BUILTIN,
-    Objects::PUSH_NAME  => Objects::PUSH_BUILTIN,
-    Objects::FIRST_NAME => Objects::FIRST_BUILTIN,
-    Objects::LAST_NAME  => Objects::LAST_BUILTIN,
-    Objects::REST_NAME  => Objects::REST_BUILTIN,
+  Objects::LEN_NAME   => Objects::LEN_BUILTIN,
+  Objects::PUSH_NAME  => Objects::PUSH_BUILTIN,
+  Objects::FIRST_NAME => Objects::FIRST_BUILTIN,
+  Objects::LAST_NAME  => Objects::LAST_BUILTIN,
+  Objects::REST_NAME  => Objects::REST_BUILTIN,
   }
 
   class Environment
@@ -64,45 +64,37 @@ module Evaluator
       end
     end
 
-    # def to_s(io)
-    #  io << "Env(store=#{@store}, outer=#{@outer})"
-    # end
+  # def to_s(io)
+  #  io << "Env(store=#{@store}, outer=#{@outer})"
+  # end
+  end
+
+  def eval(program : Program, env : Environment)
+    eval_program(program.statements, env)
   end
 
   def eval(node : Node?, env : Environment) : MObject?
-    # pp node
-    # pp env
+  # pp node
+  # pp env
     case node
     when Program
       return eval_program(node.statements, env)
-    when ExpressionStatement
-      return eval(node.expression?, env)
+    when Identifier
+      eval_identifier(node, env)
     when IntegerLiteral
-      return MInteger.new(node.value)
-    when PrefixExpression
-      return eval(node.right?, env).if_not_error do |right|
-        eval_prefix_expression(node.operator, right)
-      end
+      MInteger.new(node.value)
     when InfixExpression
-      return eval(node.left?, env).if_not_error do |left|
+      eval(node.left?, env).if_not_error do |left|
         eval(node.right?, env).if_not_error do |right|
           eval_infix_expression(node.operator, left, right)
         end
       end
-    when BooleanLiteral
-      return node.value.to_m
-    when IfExpression
-      return eval_if_expression(node, env)
     when BlockStatement
-      return eval_block_statement(node, env)
-    when ReturnStatement
-      return eval(node.return_value?, env).if_not_error do |value|
-        MReturnValue.new(value)
-      end
-    when LetStatement
-      return eval(node.value?, env).if_not_error do |value|
-        env[node.name.value] = value
-      end
+      eval_block_statement(node, env)
+    when ExpressionStatement
+      eval(node.expression?, env)
+    when IfExpression
+      eval_if_expression(node, env)
     when CallExpression
       return eval(node.function?, env).if_not_error do |function|
         args = eval_expressions(node.arguments?, env)
@@ -112,8 +104,20 @@ module Evaluator
           apply_function(function, args)
         end
       end
-    when Identifier
-      return eval_identifier(node, env)
+    when ReturnStatement
+      return eval(node.return_value?, env).if_not_error do |value|
+        MReturnValue.new(value)
+      end
+    when PrefixExpression
+      return eval(node.right?, env).if_not_error do |right|
+        eval_prefix_expression(node.operator, right)
+      end
+    when BooleanLiteral
+      return node.value.to_m
+    when LetStatement
+      return eval(node.value?, env).if_not_error do |value|
+        env[node.name.value] = value
+      end
     when FunctionLiteral
       return MFunction.new(node.parameters?, node.body?, env)
     when StringLiteral
@@ -154,7 +158,7 @@ module Evaluator
     return result
   end
 
-  private def eval_prefix_expression(operator : String, right : MObject?) : MObject?
+  private def eval_prefix_expression(operator : String, right : MObject) : MObject?
     case operator
     when "!"
       return eval_bang_operator_expression(right)
@@ -165,7 +169,7 @@ module Evaluator
     end
   end
 
-  private def eval_bang_operator_expression(right : MObject?) : MObject
+  private def eval_bang_operator_expression(right : MObject) : MObject
     case right
     when MTRUE
       return MFALSE
@@ -178,7 +182,7 @@ module Evaluator
     end
   end
 
-  private def eval_minus_prefix_operator_expression(right : MObject?) : MObject?
+  private def eval_minus_prefix_operator_expression(right : MObject) : MObject?
     if right
       case right
       when MInteger
@@ -254,10 +258,8 @@ module Evaluator
     result : MObject? = nil
     block_statement.statements?.not_nil!.each do |statement|
       result = eval(statement, env)
-      if !result.nil?
-        if result.is_a?(MReturnValue) || result.is_a?(MError)
-          return result
-        end
+      if result.is_a?(MReturnValue) || result.is_a?(MError)
+        return result
       end
     end
     return result
