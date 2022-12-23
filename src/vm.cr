@@ -4,7 +4,7 @@ require "./objects"
 
 macro execute_build_and_push(col)
   num_elements = Code.read_int(ins, ip + 1)
-  current_frame.ip += 2
+  current_frame.ip &+= 2
   {{col}} = build_{{col}}(@sp - num_elements, @sp)
   @sp -= num_elements
   push({{col}})
@@ -63,14 +63,14 @@ module Vm
       ins : Instructions
       op : Opcode
       while current_frame.ip < current_frame.instructions.size - 1
-        current_frame.ip += 1
+        current_frame.ip &+= 1
         ip = current_frame.ip
         ins = current_frame.instructions
         op = Opcode.new(ins[ip].to_i)
         case op
         when Opcode::OpConstant
           const_index = Code.read_int(ins, ip + 1)
-          current_frame.ip += 2
+          current_frame.ip &+= 2
           push(@constants[const_index])
         when Opcode::OpPop
           pop
@@ -88,7 +88,7 @@ module Vm
           execute_bang_operator
         when Opcode::OpJumpNotTruthy
           pos = Code.read_int(ins, ip + 1)
-          current_frame.ip += 2
+          current_frame.ip &+= 2
           condition = pop
           if !condition.is_truthy?
             current_frame.ip = pos - 1
@@ -100,7 +100,7 @@ module Vm
           current_frame.ip = pos - 1
         when Opcode::OpSetGlobal
           global_index = Code.read_int(ins, ip + 1)
-          current_frame.ip += 2
+          current_frame.ip &+= 2
           if global_index == @globals.size
             @globals << pop.not_nil!
           else
@@ -108,7 +108,7 @@ module Vm
           end
         when Opcode::OpGetGlobal
           global_index = Code.read_int(ins, ip + 1)
-          current_frame.ip += 2
+          current_frame.ip &+= 2
           push(@globals[global_index])
         when Opcode::OpArray
           execute_build_and_push array
@@ -121,11 +121,11 @@ module Vm
         when Opcode::OpClosure
           const_index = Code.read_int(ins, ip + 1)
           num_free = Code.read_byte(ins, ip + 3)
-          current_frame.ip += 3
+          current_frame.ip &+= 3
           push_closure(const_index, num_free.to_i)
         when Opcode::OpCall
           num_args = Code.read_byte(ins, ip + 1)
-          current_frame.ip += 1
+          current_frame.ip &+= 1
           execute_call(num_args.to_i)
         when Opcode::OpReturnValue
           return_value = pop
@@ -138,21 +138,21 @@ module Vm
           push(VM_NULL)
         when Opcode::OpSetLocal
           local_index = Code.read_byte(ins, ip + 1)
-          current_frame.ip += 1
+          current_frame.ip &+= 1
           frame = current_frame
           @stack[frame.base_pointer + local_index.to_i] = pop
         when Opcode::OpGetLocal
           local_index = Code.read_byte(ins, ip + 1)
-          current_frame.ip += 1
+          current_frame.ip &+= 1
           frame = current_frame
           push(@stack[frame.base_pointer + local_index.to_i].not_nil!)
         when Opcode::OpGetBuiltin
           built_index = Code.read_byte(ins, ip + 1)
-          current_frame.ip += 1
+          current_frame.ip &+= 1
           push(Objects::BUILTINS[built_index.to_i][1])
         when Opcode::OpGetFree
           free_index = Code.read_byte(ins, ip + 1)
-          current_frame.ip += 1
+          current_frame.ip &+= 1
           current_closure = current_frame.cl
           push(current_closure.free[free_index.to_i])
         when Opcode::OpCurrentClosure
@@ -172,7 +172,7 @@ module Vm
         raise VMException.new("stack overflow")
       end
       @stack[@sp] = obj
-      @sp += 1
+      @sp &+= 1
     end
 
     private def pop : MObject?
@@ -281,7 +281,7 @@ module Vm
       i = start_index
       while i < end_index
         elements[i - start_index] = @stack[i]
-        i += 1
+        i &+= 1
       end
       return MArray.new(elements)
     end
@@ -385,7 +385,7 @@ module Vm
     private def push_frame(frame : Frame)
       @frames[@frame_index] = frame
       @current_frame = nil
-      @frame_index += 1
+      @frame_index &+= 1
     end
 
     private def pop_frame : Frame
