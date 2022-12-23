@@ -41,6 +41,9 @@ module Vm
     @frames = Array(Vm::Frame?).new(MAX_FRAME_SIZE) { nil }
     @frame_index = 1
     @globals = [] of MObject
+    private getter current_frame : Frame do
+      @frames[@frame_index - 1].not_nil!
+    end
 
     def initialize(@bytecode : Bytecode)
       @constants = @bytecode.constants
@@ -162,10 +165,6 @@ module Vm
 
     def last_popped_stack_elem? : MObject?
       return @stack[@sp]?
-    end
-
-    private def current_frame : Vm::Frame
-      return @frames[@frame_index - 1].not_nil!
     end
 
     private def push(obj : MObject)
@@ -385,12 +384,14 @@ module Vm
 
     private def push_frame(frame : Frame)
       @frames[@frame_index] = frame
+      @current_frame = nil
       @frame_index += 1
     end
 
     private def pop_frame : Frame
       @frame_index -= 1
-      return @frames[@frame_index].not_nil!
+      @current_frame = nil
+      @frames[@frame_index].not_nil!
     end
   end
 
