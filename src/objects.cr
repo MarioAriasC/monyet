@@ -53,23 +53,11 @@ module Objects
     abstract def inspect : String
 
     def if_not_error(& : MObject -> MObject?) : MObject?
-      case self
-      when MError
-        return self
-      else
-        return yield self
-      end
+      yield self
     end
 
     def is_truthy? : Bool
-      case self
-      when MBoolean
-        return self.value
-      when MNull
-        return false
-      else
-        return true
-      end
+      true
     end
   end
 
@@ -149,6 +137,10 @@ module Objects
     def initialize(@message : String)
     end
 
+    def if_not_error(& : MObject -> MObject?) : MObject?
+      self
+    end
+
     def inspect : String
       return "ERROR: #{@message}"
     end
@@ -162,20 +154,23 @@ module Objects
     def inspect : String
       return "null"
     end
+
+    def is_truthy? : Bool
+      false
+    end
   end
 
   class MBoolean < MValue(Bool)
     def hash_type : HashType
-      return HashType::Boolean
+      HashType::Boolean
+    end
+
+    def same?(other : self)
+      other.value == @value
     end
 
     def same?(other)
-      case other
-      when MBoolean
-        return other.value == @value
-      else
-        return false
-      end
+      false
     end
 
     # def object_id
@@ -184,6 +179,10 @@ module Objects
 
     def hash_key : HashKey
       return HashKey.new(hash_type, (@value ? 1 : 0).to_u64)
+    end
+
+    def is_truthy? : Bool
+      value
     end
   end
 
