@@ -29,11 +29,11 @@ module Evaluator
   MTRUE    = MBoolean.new(true)
   MFALSE   = MBoolean.new(false)
   private BUILTINS = {
-  Objects::LEN_NAME   => Objects::LEN_BUILTIN,
-  Objects::PUSH_NAME  => Objects::PUSH_BUILTIN,
-  Objects::FIRST_NAME => Objects::FIRST_BUILTIN,
-  Objects::LAST_NAME  => Objects::LAST_BUILTIN,
-  Objects::REST_NAME  => Objects::REST_BUILTIN,
+    Objects::LEN_NAME   => Objects::LEN_BUILTIN,
+    Objects::PUSH_NAME  => Objects::PUSH_BUILTIN,
+    Objects::FIRST_NAME => Objects::FIRST_BUILTIN,
+    Objects::LAST_NAME  => Objects::LAST_BUILTIN,
+    Objects::REST_NAME  => Objects::REST_BUILTIN,
   }
 
   class Environment
@@ -64,12 +64,12 @@ module Evaluator
       end
     end
 
-  # def to_s(io)
-  #  io << "Env(store=#{@store}, outer=#{@outer})"
-  # end
+    # def to_s(io)
+    #  io << "Env(store=#{@store}, outer=#{@outer})"
+    # end
   end
 
-  def eval(program : Program, env : Environment): MObject?
+  def eval(program : Program, env : Environment) : MObject?
     result : MObject? = nil
     program.statements.each do |statement|
       result = eval(statement, env)
@@ -84,8 +84,8 @@ module Evaluator
   end
 
   private def eval(node : Node?, env : Environment) : MObject?
-  # pp node
-  # pp env
+    # pp node
+    # pp env
     case node
     when Identifier
       eval_identifier(node, env)

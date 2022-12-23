@@ -51,7 +51,7 @@ module Compilers
     end
 
     def compile(program : Program)
-      program.statements.each {|statement| compile(statement)}
+      program.statements.each { |statement| compile(statement) }
     end
 
     private def compile(node : Node)
@@ -325,5 +325,5 @@ module Compilers
   end
 
   class MCompilerException < Exception
-    end
+  end
 end

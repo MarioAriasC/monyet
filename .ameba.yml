@@ -1,5 +1,14 @@
 Style/RedundantReturn:
   Enabled: false
 
+Style/PredicateName:
+  Enabled: false
+
 Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Lint/NotNil:
+  Enabled: false
+
+Lint/DebugCalls:
   Enabled: false
