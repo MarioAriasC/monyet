@@ -69,16 +69,24 @@ module Evaluator
   # end
   end
 
-  def eval(program : Program, env : Environment)
-    eval_program(program.statements, env)
+  def eval(program : Program, env : Environment): MObject?
+    result : MObject? = nil
+    program.statements.each do |statement|
+      result = eval(statement, env)
+      case result
+      when MReturnValue
+        return result.value
+      when MError
+        return result
+      end
+    end
+    return result
   end
 
-  def eval(node : Node?, env : Environment) : MObject?
+  private def eval(node : Node?, env : Environment) : MObject?
   # pp node
   # pp env
     case node
-    when Program
-      return eval_program(node.statements, env)
     when Identifier
       eval_identifier(node, env)
     when IntegerLiteral
@@ -142,20 +150,6 @@ module Evaluator
     else
       return nil
     end
-  end
-
-  private def eval_program(statements : Array(Statement), env : Environment) : MObject?
-    result : MObject? = nil
-    statements.each do |statement|
-      result = eval(statement, env)
-      case result
-      when MReturnValue
-        return result.value
-      when MError
-        return result
-      end
-    end
-    return result
   end
 
   private def eval_prefix_expression(operator : String, right : MObject) : MObject?

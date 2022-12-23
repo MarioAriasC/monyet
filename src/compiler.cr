@@ -50,10 +50,12 @@ module Compilers
       end
     end
 
-    def compile(node : Node)
+    def compile(program : Program)
+      program.statements.each {|statement| compile(statement)}
+    end
+
+    private def compile(node : Node)
       case node
-      when Program
-        node.statements.each { |statement| compile(statement) }
       when ExpressionStatement
         compile(node.expression?.not_nil!)
         emit(Opcode::OpPop)
@@ -323,5 +325,5 @@ module Compilers
   end
 
   class MCompilerException < Exception
-  end
+    end
 end

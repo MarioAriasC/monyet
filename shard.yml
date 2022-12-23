@@ -8,7 +8,7 @@ targets:
   monyet:
     main: src/monyet.cr
 
-crystal: 1.4.1
+crystal: 1.6.2
 
 license: MIT
 

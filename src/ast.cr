@@ -32,7 +32,7 @@ module Ast
     end
   end
 
-  class Program < Node
+  class Program
     getter statements
 
     def initialize(@statements : Array(Statement))
