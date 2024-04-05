@@ -238,7 +238,7 @@ module Evaluator
 
   private def eval_if_expression(if_expression : IfExpression, env : Environment) : MObject?
     return eval(if_expression.condition?, env).if_not_error do |condition|
-      if condition.is_truthy?
+      if condition.truthy?
         eval(if_expression.consequence?, env)
       elsif !if_expression.alternative?.nil?
         eval(if_expression.alternative?, env)
@@ -379,7 +379,7 @@ end
 
 module Objects
   abstract class MObject
-    def is_truthy? : Bool
+    def truthy? : Bool
       case self
       when Evaluator::NULL
         return false
@@ -403,9 +403,9 @@ struct Nil
     return self
   end
 
-  def is_truthy : Bool
-    return true
-  end
+  # def is_truthy : Bool
+  # return true
+  # end
 
   def is_error? : Bool
     false
@@ -415,7 +415,7 @@ struct Nil
     "nil"
   end
 
-  def is_truthy? : Bool
+  def truthy? : Bool
     false
   end
 end

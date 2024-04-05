@@ -12,3 +12,6 @@ Lint/NotNil:
 
 Lint/DebugCalls:
   Enabled: false
+
+Documentation/DocumentationAdmonition:
+  Enabled: false  

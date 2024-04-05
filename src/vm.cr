@@ -90,7 +90,7 @@ module Vm
           pos = Code.read_int(ins, ip + 1)
           current_frame.ip &+= 2
           condition = pop
-          if !condition.is_truthy?
+          if !condition.truthy?
             current_frame.ip = pos - 1
           end
         when Opcode::OpNull

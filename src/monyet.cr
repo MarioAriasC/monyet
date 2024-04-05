@@ -73,7 +73,7 @@ module Monyet
     end
   end
 
-  option_parser = OptionParser.parse do |parser|
+  OptionParser.parse do |parser|
     parser.on "-v", "--version", "Show version" do
       p VERSION
       exit

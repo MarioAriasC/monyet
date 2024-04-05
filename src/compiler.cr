@@ -45,8 +45,8 @@ module Compilers
     getter scope_index : Int32 = 0
 
     def initialize(@constants = [] of MObject, @symbol_table = SymbolTable.new)
-      Objects::BUILTINS.each_with_index do |t, i|
-        @symbol_table.define_builtin(i, t[0]) # name
+      Objects::BUILTINS.each_with_index do |builtin, i|
+        @symbol_table.define_builtin(i, builtin[0]) # name
       end
     end
 
@@ -108,7 +108,7 @@ module Compilers
         compile(node.condition?.not_nil!)
         jump_not_truthy_pos = emit(Opcode::OpJumpNotTruthy, 9999)
         compile(node.consequence?.not_nil!)
-        if is_last_instruction_pop?
+        if last_instruction_pop?
           remove_last_pop
         end
         jump_pos = emit(Opcode::OpJump, 9999)
@@ -118,7 +118,7 @@ module Compilers
           emit(Opcode::OpNull)
         else
           compile(node.alternative?.not_nil!)
-          if is_last_instruction_pop?
+          if last_instruction_pop?
             remove_last_pop
           end
         end
@@ -157,7 +157,7 @@ module Compilers
         emit(Opcode::OpIndex)
       when FunctionLiteral
         enter_scope
-        if (!node.name.empty?)
+        if !node.name.empty?
           @symbol_table.define_function_name(node.name)
         end
         parameters = node.parameters?
@@ -165,7 +165,7 @@ module Compilers
           parameters.each { |parameter| @symbol_table.define(parameter.value) }
         end
         compile(node.body?.not_nil!)
-        if is_last_instruction_pop?
+        if last_instruction_pop?
           replace_last_pop_with_return
         end
         if !last_instruction_is?(Opcode::OpReturnValue)
@@ -174,7 +174,7 @@ module Compilers
         free_symbols = @symbol_table.free_symbols
         num_locals = @symbol_table.num_definitions
         instructions = leave_scope
-        free_symbols.each { |s| load_symbol(s) }
+        free_symbols.each { |free| load_symbol(free) }
 
         compiled_fn = Objects::MCompiledFunction.new(instructions: instructions, num_locals: num_locals, num_parameters: node.parameters?.not_nil!.size)
         emit(Opcode::OpClosure, add_constant(compiled_fn), free_symbols.size)
@@ -274,7 +274,7 @@ module Compilers
       return @constants.size - 1
     end
 
-    private def is_last_instruction_pop? : Bool
+    private def last_instruction_pop? : Bool
       return last_instruction_is?(Opcode::OpPop)
     end
 
