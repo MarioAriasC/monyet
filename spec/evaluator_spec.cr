@@ -187,11 +187,11 @@ describe "Evaluator" do
   it "function object" do
     input = "fn(x) { x + 2; };"
     evaluated = test_eval(input)
-    check_type(MFunction, evaluated) do |fn|
-      parameters = fn.parameters?.not_nil!
+    check_type(MFunction, evaluated) do |function|
+      parameters = function.parameters?.not_nil!
       parameters.size.should eq(1)
       parameters[0].to_s.should eq("x")
-      fn.body?.not_nil!.to_s.should eq("(x + 2)")
+      function.body?.not_nil!.to_s.should eq("(x + 2)")
     end
   end
 

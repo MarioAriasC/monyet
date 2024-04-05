@@ -2,7 +2,7 @@ require "./objects"
 require "./ast"
 
 macro error_ret(e)
-  if {{e}}.is_error?
+  if {{e}}.error?
     return {{e}}
   end
 end
@@ -106,7 +106,7 @@ module Evaluator
     when CallExpression
       return eval(node.function?, env).if_not_error do |function|
         args = eval_expressions(node.arguments?, env)
-        if args.size == 1 && args[0].is_error?
+        if args.size == 1 && args[0].error?
           return args[0]
         else
           apply_function(function, args)
@@ -142,7 +142,7 @@ module Evaluator
       return eval_hash_literal(node, env)
     when ArrayLiteral
       elements = eval_expressions(node.elements?, env)
-      if elements.size == 1 && elements[0].is_error?
+      if elements.size == 1 && elements[0].error?
         return elements[0]
       else
         MArray.new(elements)
@@ -262,7 +262,7 @@ module Evaluator
   private def eval_expressions(arguments : Array(Expression?)?, env : Environment) : Array(MObject?)
     return arguments.not_nil!.map do |argument|
       evaluated = eval(argument, env)
-      if evaluated.is_error?
+      if evaluated.error?
         return [evaluated]
       end
       evaluated
@@ -298,7 +298,7 @@ module Evaluator
     i = index.value
     max = elements.size - 1
 
-    if (i < 0 || i > max)
+    if i < 0 || i > max
       return NULL
     end
 
@@ -392,22 +392,18 @@ module Objects
       end
     end
 
-    def is_error? : Bool
+    def error? : Bool
       self.is_a?(MError)
     end
   end
 end
 
 struct Nil
-  def if_not_error(&body : Objects::MObject -> Objects::MObject?) : Objects::MObject?
+  def if_not_error(& : Objects::MObject -> Objects::MObject?) : Objects::MObject?
     return self
   end
 
-  # def is_truthy : Bool
-  # return true
-  # end
-
-  def is_error? : Bool
+  def error? : Bool
     false
   end
 

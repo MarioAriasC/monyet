@@ -27,7 +27,7 @@ module Lexers
       end
     end
 
-    private def read_value(&predicate : Char -> Bool) : String
+    private def read_value(& : Char -> Bool) : String
       current_position = @position
       while yield @ch
         read_char
@@ -40,7 +40,7 @@ module Lexers
     end
 
     private def read_identifier : String
-      read_value(&.is_identifier?)
+      read_value(&.identifier?)
     end
 
     private def read_string : String
@@ -59,7 +59,7 @@ module Lexers
     end
 
     private def ends_with_equal(one_char : TokenType, two_chars : TokenType, duplicate_chars = true)
-      if (peak_char == '=')
+      if peak_char == '='
         current_char = @ch
         read_char
         value = if duplicate_chars
@@ -74,7 +74,7 @@ module Lexers
     end
 
     private def skip_whitespace
-      while WHITE_SPACES.any? { |wp| wp == @ch }
+      while WHITE_SPACES.any? { |white_space| white_space == @ch }
         read_char
       end
     end
@@ -123,7 +123,7 @@ module Lexers
         r = Token.new(EOF, "")
       else
         case
-        when @ch.is_identifier?
+        when @ch.identifier?
           identifier = read_identifier
           return Token.new(identifier.lookup_ident, identifier)
         when @ch.number?
@@ -139,7 +139,7 @@ module Lexers
 end
 
 struct Char
-  def is_identifier? : Bool
+  def identifier? : Bool
     self.letter? || self == '_'
   end
 end
