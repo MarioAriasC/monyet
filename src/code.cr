@@ -174,7 +174,7 @@ module Code
 
   private def read_u8(ins : MBytes) : UInt8
     int = read(ins, 0)
-    if (int < 0)
+    if int < 0
       raise "error reading byte"
     else
       return int.to_u8

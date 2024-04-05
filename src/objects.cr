@@ -56,7 +56,7 @@ module Objects
       yield self
     end
 
-    def is_truthy? : Bool
+    def truthy? : Bool
       true
     end
   end
@@ -155,7 +155,7 @@ module Objects
       return "null"
     end
 
-    def is_truthy? : Bool
+    def truthy? : Bool
       false
     end
   end
@@ -181,7 +181,7 @@ module Objects
       return HashKey.new(hash_type, (@value ? 1 : 0).to_u64)
     end
 
-    def is_truthy? : Bool
+    def truthy? : Bool
       value
     end
   end

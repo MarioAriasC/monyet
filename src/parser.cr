@@ -340,7 +340,7 @@ module Parsers
         next_token
         value = parse_expression(Precedence::Lowest)
         pairs[key.not_nil!] = value.not_nil!
-        if (!peek_token_is?(RBRACE) && !expect_peek?(COMMA))
+        if !peek_token_is?(RBRACE) && !expect_peek?(COMMA)
           return nil
         end
       end

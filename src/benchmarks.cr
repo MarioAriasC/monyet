@@ -76,7 +76,7 @@ fibonacci(#{size});)
   end
 
   private def step(x : Int64) : Int64
-    if (x < 2)
+    if x < 2
       return x
     else
       step(x - 1) + step(x - 2)
