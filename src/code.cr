@@ -55,38 +55,36 @@ module Code
     end
   end
 
-  DEFINITIONS = {
-    Opcode::OpConstant       => "OpConstant".to_definition(2),
-    Opcode::OpAdd            => "OpAdd".to_definition,
-    Opcode::OpPop            => "OpPop".to_definition,
-    Opcode::OpSub            => "OpSub".to_definition,
-    Opcode::OpMul            => "OpMul".to_definition,
-    Opcode::OpDiv            => "OpDiv".to_definition,
-    Opcode::OpTrue           => "OpTrue".to_definition,
-    Opcode::OpFalse          => "OpFalse".to_definition,
-    Opcode::OpEqual          => "OpEqual".to_definition,
-    Opcode::OpNotEqual       => "OpNotEqual".to_definition,
-    Opcode::OpGreaterThan    => "OpGreaterThan".to_definition,
-    Opcode::OpMinus          => "OpMinus".to_definition,
-    Opcode::OpBang           => "OpBang".to_definition,
-    Opcode::OpJumpNotTruthy  => "OpJumpNotTruthy".to_definition(2),
-    Opcode::OpJump           => "OpJump".to_definition(2),
-    Opcode::OpNull           => "OpNull".to_definition,
-    Opcode::OpGetGlobal      => "OpGetGlobal".to_definition(2),
-    Opcode::OpSetGlobal      => "OpSetGlobal".to_definition(2),
-    Opcode::OpArray          => "OpArray".to_definition(2),
-    Opcode::OpHash           => "OpHash".to_definition(2),
-    Opcode::OpIndex          => "OpIndex".to_definition,
-    Opcode::OpCall           => "OpCall".to_definition(1),
-    Opcode::OpReturnValue    => "OpReturnValue".to_definition,
-    Opcode::OpReturn         => "OpReturn".to_definition,
-    Opcode::OpGetLocal       => "OpGetLocal".to_definition(1),
-    Opcode::OpSetLocal       => "OpSetLocal".to_definition(1),
-    Opcode::OpGetBuiltin     => "OpGetBuiltin".to_definition(1),
-    Opcode::OpClosure        => "OpClosure".to_definition(2, 1),
-    Opcode::OpGetFree        => "OpGetFree".to_definition(1),
-    Opcode::OpCurrentClosure => "OpCurrentClosure".to_definition,
-  }
+  DEF_OP_CONSTANT = "OpConstant".to_definition(2)
+  DEF_OP_ADD = "OpAdd".to_definition
+  DEF_OP_POP = "OpPop".to_definition
+  DEF_OP_SUB = "OpSub".to_definition
+  DEF_OP_MUL = "OpMul".to_definition
+  DEF_OP_DIV = "OpDiv".to_definition
+  DEF_OP_TRUE = "OpTrue".to_definition
+  DEF_OP_FALSE = "OpFalse".to_definition
+  DEF_OP_EQUAL = "OpEqual".to_definition
+  DEF_OP_NOT_EQUAL = "OpNotEqual".to_definition
+  DEF_OP_GREATER_THAN = "OpGreaterThan".to_definition
+  DEF_OP_MINUS = "OpMinus".to_definition
+  DEF_OP_BANG = "OpBang".to_definition
+  DEF_OP_JUMP_NOT_TRUTHY = "OpJumpNotTruthy".to_definition(2)
+  DEF_OP_JUMP = "OpJump".to_definition(2)
+  DEF_OP_NULL = "OpNull".to_definition
+  DEF_OP_GET_GLOBAL = "OpGetGlobal".to_definition(2)
+  DEF_OP_SET_GLOBAL = "OpSetGlobal".to_definition(2)
+  DEF_OP_ARRAY = "OpArray".to_definition(2)
+  DEF_OP_HASH = "OpHash".to_definition(2)
+  DEF_OP_INDEX = "OpIndex".to_definition
+  DEF_OP_CALL = "OpCall".to_definition(1)
+  DEF_OP_RETURN_VALUE = "OpReturnValue".to_definition
+  DEF_OP_RETURN = "OpReturn".to_definition
+  DEF_OP_GET_LOCAL = "OpGetLocal".to_definition(1)
+  DEF_OP_SET_LOCAL = "OpSetLocal".to_definition(1)
+  DEF_OP_GET_BUILTIN = "OpGetBuiltin".to_definition(1)
+  DEF_OP_CLOSURE = "OpClosure".to_definition(2, 1)
+  DEF_OP_GET_FREE = "OpGetFree".to_definition(1)
+  DEF_OP_CURRENT_CLOSURE = "OpCurrentClosure".to_definition
 
   {% if flag?(:slice) %}
     alias Instructions = Bytes
@@ -95,9 +93,67 @@ module Code
   {% end %}
 
   def lookup(op : Opcode) : Definition
-    definition = DEFINITIONS[op]
-    if !definition.nil?
-      return definition
+    case op
+    when Opcode::OpConstant
+      return DEF_OP_CONSTANT
+    when Opcode::OpAdd
+      return DEF_OP_ADD
+    when Opcode::OpPop
+      return DEF_OP_POP
+    when Opcode::OpSub
+      return DEF_OP_SUB
+    when Opcode::OpMul
+      return DEF_OP_MUL
+    when Opcode::OpDiv
+      return DEF_OP_DIV
+    when Opcode::OpTrue
+      return DEF_OP_TRUE
+    when Opcode::OpFalse
+      return DEF_OP_FALSE
+    when Opcode::OpEqual
+      return DEF_OP_EQUAL
+    when Opcode::OpNotEqual
+      return DEF_OP_NOT_EQUAL
+    when Opcode::OpGreaterThan
+      return DEF_OP_GREATER_THAN
+    when Opcode::OpMinus
+      return DEF_OP_MINUS
+    when Opcode::OpBang
+      return DEF_OP_BANG
+    when Opcode::OpJumpNotTruthy
+      return DEF_OP_JUMP_NOT_TRUTHY
+    when Opcode::OpJump
+      return DEF_OP_JUMP
+    when Opcode::OpNull
+      return DEF_OP_NULL
+    when Opcode::OpGetGlobal
+      return DEF_OP_GET_GLOBAL
+    when Opcode::OpSetGlobal
+      return DEF_OP_SET_GLOBAL
+    when Opcode::OpArray
+      return DEF_OP_ARRAY
+    when Opcode::OpHash
+      return DEF_OP_HASH
+    when Opcode::OpIndex
+      return DEF_OP_INDEX
+    when Opcode::OpCall
+      return DEF_OP_CALL
+    when Opcode::OpReturnValue
+      return DEF_OP_RETURN_VALUE
+    when Opcode::OpReturn
+      return DEF_OP_RETURN
+    when Opcode::OpGetLocal
+      return DEF_OP_GET_LOCAL
+    when Opcode::OpSetLocal
+      return DEF_OP_SET_LOCAL
+    when Opcode::OpGetBuiltin
+      return DEF_OP_GET_BUILTIN
+    when Opcode::OpClosure
+      return DEF_OP_CLOSURE
+    when Opcode::OpGetFree
+      return DEF_OP_GET_FREE
+    when Opcode::OpCurrentClosure
+      return DEF_OP_CURRENT_CLOSURE
     else
       raise "opcode #{op} undefined"
     end
