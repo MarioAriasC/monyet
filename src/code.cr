@@ -55,35 +55,35 @@ module Code
     end
   end
 
-  DEF_OP_CONSTANT = "OpConstant".to_definition(2)
-  DEF_OP_ADD = "OpAdd".to_definition
-  DEF_OP_POP = "OpPop".to_definition
-  DEF_OP_SUB = "OpSub".to_definition
-  DEF_OP_MUL = "OpMul".to_definition
-  DEF_OP_DIV = "OpDiv".to_definition
-  DEF_OP_TRUE = "OpTrue".to_definition
-  DEF_OP_FALSE = "OpFalse".to_definition
-  DEF_OP_EQUAL = "OpEqual".to_definition
-  DEF_OP_NOT_EQUAL = "OpNotEqual".to_definition
-  DEF_OP_GREATER_THAN = "OpGreaterThan".to_definition
-  DEF_OP_MINUS = "OpMinus".to_definition
-  DEF_OP_BANG = "OpBang".to_definition
+  DEF_OP_CONSTANT        = "OpConstant".to_definition(2)
+  DEF_OP_ADD             = "OpAdd".to_definition
+  DEF_OP_POP             = "OpPop".to_definition
+  DEF_OP_SUB             = "OpSub".to_definition
+  DEF_OP_MUL             = "OpMul".to_definition
+  DEF_OP_DIV             = "OpDiv".to_definition
+  DEF_OP_TRUE            = "OpTrue".to_definition
+  DEF_OP_FALSE           = "OpFalse".to_definition
+  DEF_OP_EQUAL           = "OpEqual".to_definition
+  DEF_OP_NOT_EQUAL       = "OpNotEqual".to_definition
+  DEF_OP_GREATER_THAN    = "OpGreaterThan".to_definition
+  DEF_OP_MINUS           = "OpMinus".to_definition
+  DEF_OP_BANG            = "OpBang".to_definition
   DEF_OP_JUMP_NOT_TRUTHY = "OpJumpNotTruthy".to_definition(2)
-  DEF_OP_JUMP = "OpJump".to_definition(2)
-  DEF_OP_NULL = "OpNull".to_definition
-  DEF_OP_GET_GLOBAL = "OpGetGlobal".to_definition(2)
-  DEF_OP_SET_GLOBAL = "OpSetGlobal".to_definition(2)
-  DEF_OP_ARRAY = "OpArray".to_definition(2)
-  DEF_OP_HASH = "OpHash".to_definition(2)
-  DEF_OP_INDEX = "OpIndex".to_definition
-  DEF_OP_CALL = "OpCall".to_definition(1)
-  DEF_OP_RETURN_VALUE = "OpReturnValue".to_definition
-  DEF_OP_RETURN = "OpReturn".to_definition
-  DEF_OP_GET_LOCAL = "OpGetLocal".to_definition(1)
-  DEF_OP_SET_LOCAL = "OpSetLocal".to_definition(1)
-  DEF_OP_GET_BUILTIN = "OpGetBuiltin".to_definition(1)
-  DEF_OP_CLOSURE = "OpClosure".to_definition(2, 1)
-  DEF_OP_GET_FREE = "OpGetFree".to_definition(1)
+  DEF_OP_JUMP            = "OpJump".to_definition(2)
+  DEF_OP_NULL            = "OpNull".to_definition
+  DEF_OP_GET_GLOBAL      = "OpGetGlobal".to_definition(2)
+  DEF_OP_SET_GLOBAL      = "OpSetGlobal".to_definition(2)
+  DEF_OP_ARRAY           = "OpArray".to_definition(2)
+  DEF_OP_HASH            = "OpHash".to_definition(2)
+  DEF_OP_INDEX           = "OpIndex".to_definition
+  DEF_OP_CALL            = "OpCall".to_definition(1)
+  DEF_OP_RETURN_VALUE    = "OpReturnValue".to_definition
+  DEF_OP_RETURN          = "OpReturn".to_definition
+  DEF_OP_GET_LOCAL       = "OpGetLocal".to_definition(1)
+  DEF_OP_SET_LOCAL       = "OpSetLocal".to_definition(1)
+  DEF_OP_GET_BUILTIN     = "OpGetBuiltin".to_definition(1)
+  DEF_OP_CLOSURE         = "OpClosure".to_definition(2, 1)
+  DEF_OP_GET_FREE        = "OpGetFree".to_definition(1)
   DEF_OP_CURRENT_CLOSURE = "OpCurrentClosure".to_definition
 
   {% if flag?(:slice) %}
