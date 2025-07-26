@@ -197,7 +197,7 @@ module Objects
 
     def hash_key : HashKey
       @value = POOL.get(@value)
-      return HashKey.new(hash_type, @value.object_id)
+      return HashKey.new(hash_type, @value.hash)
     end
   end
 
