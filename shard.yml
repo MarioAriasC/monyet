@@ -8,11 +8,11 @@ targets:
   monyet:
     main: src/monyet.cr
 
-crystal: 1.11.2
+crystal: 1.17.1
 
 license: MIT
 
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
-    version: ~> 1.6.1
+    version: ~> 1.6.4
