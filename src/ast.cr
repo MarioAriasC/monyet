@@ -1,12 +1,39 @@
 require "./token"
 
+macro def_mask
+    def mask : UInt8
+      Mask::{{ @type.name[5..] }}.value
+    end
+  end
+
 module Ast
   extend self
   include Tokens
 
+  enum Mask : UInt8
+    Identifier
+    IntegerLiteral
+    InfixExpression
+    BlockStatement
+    ExpressionStatement
+    IfExpression
+    CallExpression
+    ReturnStatement
+    PrefixExpression
+    BooleanLiteral
+    LetStatement
+    FunctionLiteral
+    StringLiteral
+    IndexExpression
+    HashLiteral
+    ArrayLiteral
+    NULL
+  end
+
   abstract class Node
     abstract def token_literal : String
     abstract def to_s(io)
+    abstract def mask : UInt8
   end
 
   abstract class Statement < Node
@@ -61,6 +88,8 @@ module Ast
     def to_s(io)
       io << @value
     end
+
+    def_mask
   end
 
   class LetStatement < Statement
@@ -75,6 +104,8 @@ module Ast
     def to_s(io)
       io << "#{token_literal} #{@name} = #{@value.or_else("")};"
     end
+
+    def_mask
   end
 
   class IntegerLiteral < Expression
@@ -84,6 +115,8 @@ module Ast
 
     def initialize(@token : Token, @value : Int64)
     end
+
+    def_mask
   end
 
   class BooleanLiteral < Expression
@@ -93,6 +126,8 @@ module Ast
 
     def initialize(@token : Token, @value : Bool)
     end
+
+    def_mask
   end
 
   class ReturnStatement < Statement
@@ -105,6 +140,8 @@ module Ast
     def to_s(io)
       io << "#{token_literal} #{@return_value.or_else("")};"
     end
+
+    def_mask
   end
 
   class ExpressionStatement < Statement
@@ -117,6 +154,8 @@ module Ast
     def to_s(io)
       io << "#{@expression.or_else("")}"
     end
+
+    def_mask
   end
 
   class PrefixExpression < Expression
@@ -130,6 +169,8 @@ module Ast
     def to_s(io)
       io << "(#{@operator}#{@right})"
     end
+
+    def_mask
   end
 
   class InfixExpression < Expression
@@ -144,6 +185,8 @@ module Ast
     def to_s(io)
       io << "(#{@left} #{@operator} #{@right})"
     end
+
+    def_mask
   end
 
   class CallExpression < Expression
@@ -157,6 +200,8 @@ module Ast
     def to_s(io)
       io << "#{@function}(#{@arguments.or_else([] of String).join(", ")})"
     end
+
+    def_mask
   end
 
   class BlockStatement < Statement
@@ -169,6 +214,8 @@ module Ast
     def to_s(io)
       io << "#{@statements.or_else([] of String).join("")}"
     end
+
+    def_mask
   end
 
   class IfExpression < Expression
@@ -184,6 +231,8 @@ module Ast
     def to_s(io)
       io << "if(#{@condition}) #{@consequence} #{@alternative ? "else #{@alternative}" : ""}"
     end
+
+    def_mask
   end
 
   class FunctionLiteral < Expression
@@ -198,6 +247,8 @@ module Ast
     def to_s(io)
       io << "#{token_literal}#{@name.empty? ? "" : "<#{@name}>"}(#{@parameters.or_else([] of String).join(", ")}) {#{@body}}"
     end
+
+    def_mask
   end
 
   class StringLiteral < Expression
@@ -211,6 +262,8 @@ module Ast
     def to_s(io)
       io << @value
     end
+
+    def_mask
   end
 
   class ArrayLiteral < Expression
@@ -224,6 +277,8 @@ module Ast
     def to_s(io)
       io << "[#{@elements.or_else([] of String).join(", ")}]"
     end
+
+    def_mask
   end
 
   class IndexExpression < Expression
@@ -238,6 +293,8 @@ module Ast
     def to_s(io)
       io << "(#{@left}[#{@index}])"
     end
+
+    def_mask
   end
 
   class HashLiteral < Expression
@@ -251,5 +308,7 @@ module Ast
     def to_s(io)
       io << "{#{@pairs.map { |key, value| "#{key}:#{value}" }.join(", ")}}"
     end
+
+    def_mask
   end
 end

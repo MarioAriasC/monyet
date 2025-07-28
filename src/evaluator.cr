@@ -7,6 +7,11 @@ macro error_ret(e)
   end
 end
 
+# Creates a literal block with Node? and Environment as parameters
+macro neb(&block)
+  ->(node : Node?, env : Environment) {{ block }}
+end
+
 alias MObject = Objects::MObject
 alias MInteger = Objects::MInteger
 alias MBoolean = Objects::MBoolean
@@ -83,73 +88,83 @@ module Evaluator
     return result
   end
 
-  private def eval(node : Node?, env : Environment) : MObject?
-    # pp node
-    # pp env
-    case node
-    when Identifier
-      eval_identifier(node, env)
-    when IntegerLiteral
-      MInteger.new(node.value)
-    when InfixExpression
-      eval(node.left?, env).if_not_error do |left|
-        eval(node.right?, env).if_not_error do |right|
-          eval_infix_expression(node.operator, left, right)
+  private MASKS = [
+    neb { eval_identifier(node.as(Identifier), env) },
+    neb { MInteger.new(node.as(IntegerLiteral).value) },
+    neb do
+      infix = node.as(InfixExpression)
+
+      eval(infix.left?, env).if_not_error do |left|
+        eval(infix.right?, env).if_not_error do |right|
+          eval_infix_expression(infix.operator, left, right)
         end
       end
-    when BlockStatement
-      eval_block_statement(node, env)
-    when ExpressionStatement
-      eval(node.expression?, env)
-    when IfExpression
-      eval_if_expression(node, env)
-    when CallExpression
-      return eval(node.function?, env).if_not_error do |function|
-        args = eval_expressions(node.arguments?, env)
+    end,
+    neb { eval_block_statement(node.as(BlockStatement), env) },
+    neb { eval(node.as(ExpressionStatement).expression?, env) },
+    neb { eval_if_expression(node.as(IfExpression), env) },
+    neb do
+      call_expression = node.as(CallExpression)
+
+      eval(call_expression.function?, env).if_not_error do |function|
+        args = eval_expressions(call_expression.arguments?, env)
         if args.size == 1 && args[0].error?
           return args[0]
         else
           apply_function(function, args)
         end
       end
-    when ReturnStatement
-      return eval(node.return_value?, env).if_not_error do |value|
+    end,
+    neb do
+      eval(node.as(ReturnStatement).return_value?, env).if_not_error do |value|
         MReturnValue.new(value)
       end
-    when PrefixExpression
-      return eval(node.right?, env).if_not_error do |right|
-        eval_prefix_expression(node.operator, right)
+    end,
+    neb do
+      prefix_expression = node.as(PrefixExpression)
+
+      eval(prefix_expression.right?, env).if_not_error do |right|
+        eval_prefix_expression(prefix_expression.operator, right)
       end
-    when BooleanLiteral
-      return node.value.to_m
-    when LetStatement
-      return eval(node.value?, env).if_not_error do |value|
-        env[node.name.value] = value
+    end,
+    neb { node.as(BooleanLiteral).value.to_m },
+    neb do
+      let_statement = node.as(LetStatement)
+
+      eval(let_statement.value?, env).if_not_error do |value|
+        env[let_statement.name.value] = value
       end
-    when FunctionLiteral
-      return MFunction.new(node.parameters?, node.body?, env)
-    when StringLiteral
-      return MString.new(node.value)
-    when IndexExpression
-      left = eval(node.left?, env)
+    end,
+    neb do
+      function_literal = node.as(FunctionLiteral)
+
+      MFunction.new(function_literal.parameters?, function_literal.body?, env)
+    end,
+    neb { MString.new(node.as(StringLiteral).value) },
+    neb do
+      index_expression = node.as(IndexExpression)
+
+      left = eval(index_expression.left?, env)
       error_ret left
 
-      index = eval(node.index?, env)
+      index = eval(index_expression.index?, env)
       error_ret index
 
-      return eval_index_expression(left, index)
-    when HashLiteral
-      return eval_hash_literal(node, env)
-    when ArrayLiteral
-      elements = eval_expressions(node.elements?, env)
+      eval_index_expression(left, index)
+    end,
+    neb { eval_hash_literal(node.as(HashLiteral), env) },
+    neb do
+      elements = eval_expressions(node.as(ArrayLiteral).elements?, env)
       if elements.size == 1 && elements[0].error?
         return elements[0]
       else
         MArray.new(elements)
       end
-    else
-      return nil
-    end
+    end,
+  ]
+
+  private def eval(node : Node?, env : Environment) : MObject?
+    MASKS[node.mask].call(node, env)
   end
 
   private def eval_prefix_expression(operator : String, right : MObject) : MObject?
@@ -413,6 +428,10 @@ struct Nil
 
   def truthy? : Bool
     false
+  end
+
+  def mask : UInt8
+    Mask::NULL.value
   end
 end
 
