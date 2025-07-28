@@ -431,7 +431,7 @@ struct Nil
   end
 
   def mask : UInt8
-    Mask::NULL.value
+    Ast::Mask::NULL.value
   end
 end
 
