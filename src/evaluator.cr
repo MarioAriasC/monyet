@@ -84,8 +84,6 @@ module Evaluator
   end
 
   private def eval(node : Node?, env : Environment) : MObject?
-    # pp node
-    # pp env
     case node
     when Identifier
       eval_identifier(node, env)

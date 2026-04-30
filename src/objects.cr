@@ -87,17 +87,11 @@ module Objects
 
     # int_operations
 
-    def +(other : MInteger)
-      return MInteger.new(@value + other.value)
-    end
-
-    def -(other : MInteger)
-      return MInteger.new(@value - other.value)
-    end
-
-    def *(other : MInteger)
-      return MInteger.new(@value * other.value)
-    end
+    {% for name in ["+", "-", "*"] %}
+      def {{name.id}}(other : MInteger)
+        MInteger.new(@value {{name.id}} other.value)
+      end
+    {% end %}
 
     def /(other : MInteger)
       return MInteger.new((@value / other.value).to_i64)
