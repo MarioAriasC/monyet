@@ -97,13 +97,11 @@ module Objects
       return MInteger.new((@value / other.value).to_i64)
     end
 
-    def <(other : MInteger)
-      return @value < other.value
-    end
-
-    def >(other : MInteger)
-      return @value > other.value
-    end
+    {% for name in ["<", ">"] %}
+      def {{name.id}}(other : MInteger)
+        return @value {{name.id}} other.value
+      end
+    {% end %}
 
     def same?(other : MInteger)
       return @value == other.value
