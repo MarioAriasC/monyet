@@ -30,13 +30,8 @@ module Compilers
     property last_instruction
     property previous_instruction
 
-    {% if flag?(:slice) %}
-      def initialize(@instructions : Instructions = Instructions.empty, @last_instruction = EmittedInstruction.new, @previous_instruction = EmittedInstruction.new)
-      end
-    {% else %}
-      def initialize(@instructions : Instructions = [] of UInt8, @last_instruction = EmittedInstruction.new, @previous_instruction = EmittedInstruction.new)
-      end
-    {% end %}
+    def initialize(@instructions : Instructions = [] of UInt8, @last_instruction = EmittedInstruction.new, @previous_instruction = EmittedInstruction.new)
+    end
   end
 
   struct MCompiler
@@ -236,22 +231,9 @@ module Compilers
     private def add_instruction(ins : Instructions) : Int32
       pos = current_instructions.size
       current_scope
-      {% if flag?(:slice) %}
-        current_scope.instructions = concat(current_scope.instructions, ins)
-      {% else %}
-        current_scope.instructions += ins
-      {% end %}
+      current_scope.instructions += ins
       return pos
     end
-
-    {% if flag?(:slice) %}
-      private def concat(a : Instructions, b : Instructions) : Instructions
-        mem = IO::Memory.new
-        mem.write(a)
-        mem.write(b)
-        mem.to_slice
-      end
-    {% end %}
 
     private def remove_last_pop
       last = current_scope.last_instruction
