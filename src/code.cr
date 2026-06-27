@@ -1,11 +1,7 @@
 macro ret_ins
   puts typeof(ex)
   puts ex.message
-  {% if flag?(:slice) %}
-  return Instructions.empty
-  {% else %}
   return [] of UInt8
-  {% end %}
 end
 
 module Code
@@ -86,11 +82,7 @@ module Code
   DEF_OP_GET_FREE        = "OpGetFree".to_definition(1)
   DEF_OP_CURRENT_CLOSURE = "OpCurrentClosure".to_definition
 
-  {% if flag?(:slice) %}
-    alias Instructions = Bytes
-  {% else %}
-    alias Instructions = Array(UInt8)
-  {% end %}
+  alias Instructions = Array(UInt8)
 
   def lookup(op : Opcode) : Definition
     case op
@@ -183,11 +175,7 @@ module Code
 
   def make(op : Opcode) : Instructions
     lookup(op)
-    {% if flag?(:slice) %}
-      return Instructions[op.to_u8]
-    {% else %}
-      return [op.to_u8]
-    {% end %}
+    return [op.to_u8]
   rescue ex
     ret_ins
   end
@@ -196,21 +184,15 @@ module Code
     ins[0..(i - 1)]
   end
 
-  alias MBytes = OffsetArray | Instructions
-
-  private def offset(ins : Instructions, i : Int32) : MBytes
-    {% if flag?(:slice) %}
-      ins[i...(ins.size)]
-    {% else %}
-      OffsetArray.new(ins, i)
-    {% end %}
+  private def offset(ins : Instructions, i : Int32) : Instructions
+    ins[i...(ins.size)]
   end
 
   def read_int(ins : Instructions, i : Int32) : Int32
     return read_u16(offset(ins, i)).to_i
   end
 
-  private def read_u16(ins : MBytes) : UInt16
+  private def read_u16(ins : Instructions) : UInt16
     ch1 = read(ins, 0)
     ch2 = read(ins, 1)
     if (ch1 | ch2) < 0
@@ -220,7 +202,7 @@ module Code
     end
   end
 
-  private def read(ins : MBytes, position : Int32) : Int32
+  private def read(ins : Instructions, position : Int32) : Int32
     return (ins[position] & 255.to_u).to_i
   end
 
@@ -228,21 +210,12 @@ module Code
     return read_u8(offset(ins, i))
   end
 
-  private def read_u8(ins : MBytes) : UInt8
+  private def read_u8(ins : Instructions) : UInt8
     int = read(ins, 0)
     if int < 0
       raise "error reading byte"
     else
       return int.to_u8
-    end
-  end
-
-  struct OffsetArray
-    def initialize(@inner : Instructions, @offset : Int32)
-    end
-
-    def [](i : Int32) : UInt8
-      return @inner[i + @offset]
     end
   end
 end

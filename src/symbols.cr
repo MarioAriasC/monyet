@@ -8,14 +8,7 @@ module Symbols
     Function
   end
 
-  struct Symbol
-    getter name
-    getter scope
-    getter index
-
-    def initialize(@name : String, @scope : SymbolScope, @index : Int32)
-    end
-  end
+  record Symbol, name : String, scope : SymbolScope, index : Int32
 
   class SymbolTable
     property num_definitions : Int32 = 0

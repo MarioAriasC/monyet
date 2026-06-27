@@ -3,18 +3,6 @@ require "./evaluator"
 require "./ast"
 require "./code"
 
-# macro clean(c)
-#  c.delete(%("))
-# end
-
-# macro int_operations
-#  {% for operation in [+] %}
-#    def {{operation}}(other : MInteger)
-#      return MInteger.new(@value {{operation}} other.value)
-#    end
-#  {% end%}
-# end
-
 module Objects
   extend self
   include Ast
@@ -29,21 +17,9 @@ module Objects
     String
   end
 
-  struct HashKey
-    getter hash_type
-    getter value
+  record HashKey, hash_type : HashType, value : UInt64
 
-    def initialize(@hash_type : HashType, @value : UInt64)
-    end
-  end
-
-  struct HashPair
-    getter key
-    getter value
-
-    def initialize(@key : MObject, @value : MObject)
-    end
-  end
+  record HashPair, key : MObject, value : MObject
 
   abstract class MObject
     def type_desc : String
