@@ -1,8 +1,5 @@
 Style/RedundantReturn:
-  Enabled: false
-
-Style/PredicateName:
-  Enabled: false
+  Enabled: true
 
 Metrics/CyclomaticComplexity:
   Enabled: false
@@ -13,5 +10,5 @@ Lint/NotNil:
 Lint/DebugCalls:
   Enabled: false
 
-Documentation/DocumentationAdmonition:
-  Enabled: false  
+Style/MultilineStringLiteral:
+  Enabled: false

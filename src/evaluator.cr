@@ -2,8 +2,8 @@ require "./objects"
 require "./ast"
 
 macro error_ret(e)
-  if {{e}}.error?
-    return {{e}}
+  if {{ e }}.error?
+    return {{ e }}
   end
 end
 
@@ -58,9 +58,9 @@ module Evaluator
     def []?(name : String) : MObject?
       obj = @store[name]?
       if obj.nil? && !@outer.nil?
-        return @outer.not_nil![name]?
+        @outer.not_nil![name]?
       else
-        return obj
+        obj
       end
     end
 
@@ -80,7 +80,7 @@ module Evaluator
         return result
       end
     end
-    return result
+    result
   end
 
   private def eval(node : Node?, env : Environment) : MObject?
@@ -102,7 +102,7 @@ module Evaluator
     when IfExpression
       eval_if_expression(node, env)
     when CallExpression
-      return eval(node.function?, env).if_not_error do |function|
+      eval(node.function?, env).if_not_error do |function|
         args = eval_expressions(node.arguments?, env)
         if args.size == 1 && args[0].error?
           return args[0]
@@ -111,23 +111,23 @@ module Evaluator
         end
       end
     when ReturnStatement
-      return eval(node.return_value?, env).if_not_error do |value|
+      eval(node.return_value?, env).if_not_error do |value|
         MReturnValue.new(value)
       end
     when PrefixExpression
-      return eval(node.right?, env).if_not_error do |right|
+      eval(node.right?, env).if_not_error do |right|
         eval_prefix_expression(node.operator, right)
       end
     when BooleanLiteral
-      return node.value.to_m
+      node.value.to_m
     when LetStatement
-      return eval(node.value?, env).if_not_error do |value|
+      eval(node.value?, env).if_not_error do |value|
         env[node.name.value] = value
       end
     when FunctionLiteral
-      return MFunction.new(node.parameters?, node.body?, env)
+      MFunction.new(node.parameters?, node.body?, env)
     when StringLiteral
-      return MString.new(node.value)
+      MString.new(node.value)
     when IndexExpression
       left = eval(node.left?, env)
       error_ret left
@@ -135,42 +135,42 @@ module Evaluator
       index = eval(node.index?, env)
       error_ret index
 
-      return eval_index_expression(left, index)
+      eval_index_expression(left, index)
     when HashLiteral
-      return eval_hash_literal(node, env)
+      eval_hash_literal(node, env)
     when ArrayLiteral
       elements = eval_expressions(node.elements?, env)
       if elements.size == 1 && elements[0].error?
-        return elements[0]
+        elements[0]
       else
         MArray.new(elements)
       end
     else
-      return nil
+      return
     end
   end
 
   private def eval_prefix_expression(operator : String, right : MObject) : MObject?
     case operator
     when "!"
-      return eval_bang_operator_expression(right)
+      eval_bang_operator_expression(right)
     when "-"
-      return eval_minus_prefix_operator_expression(right)
+      eval_minus_prefix_operator_expression(right)
     else
-      return MError.new("Unkown operator : #{operator}#{right.type_desc}")
+      MError.new("Unkown operator : #{operator}#{right.type_desc}")
     end
   end
 
   private def eval_bang_operator_expression(right : MObject) : MObject
     case right
     when MTRUE
-      return MFALSE
+      MFALSE
     when MFALSE
-      return MTRUE
+      MTRUE
     when NULL
-      return MTRUE
+      MTRUE
     else
-      return MFALSE
+      MFALSE
     end
   end
 
@@ -178,64 +178,64 @@ module Evaluator
     if right
       case right
       when MInteger
-        return -right
+        -right
       else
-        return MError.new("unknown operator: -#{right.type_desc}")
+        MError.new("unknown operator: -#{right.type_desc}")
       end
     else
-      return nil
+      return
     end
   end
 
   private def eval_infix_expression(operator : String, left : MObject, right : MObject) : MObject
     if left.is_a?(MInteger) && right.is_a?(MInteger)
-      return eval_integer_infix_expression(operator, left, right)
+      eval_integer_infix_expression(operator, left, right)
     elsif operator == "=="
-      return (left == right).to_m
+      (left == right).to_m
     elsif operator == "!="
-      return (left != right).to_m
+      (left != right).to_m
     elsif left.type_desc != right.type_desc
-      return MError.new("type mismatch: #{left.type_desc} #{operator} #{right.type_desc}")
+      MError.new("type mismatch: #{left.type_desc} #{operator} #{right.type_desc}")
     elsif left.is_a?(MString) && right.is_a?(MString)
-      return eval_string_infix_expression(operator, left, right)
+      eval_string_infix_expression(operator, left, right)
     else
-      return MError.new("unknown operator: #{left.type_desc} #{operator} #{right.type_desc}")
+      MError.new("unknown operator: #{left.type_desc} #{operator} #{right.type_desc}")
     end
   end
 
   private def eval_integer_infix_expression(operator : String, left : MInteger, right : MInteger) : MObject
     case operator
     when "+"
-      return left + right
+      left + right
     when "-"
-      return left - right
+      left - right
     when "*"
-      return left * right
+      left * right
     when "/"
-      return left / right
+      left / right
     when "<"
-      return (left < right).to_m
+      (left < right).to_m
     when ">"
-      return (left > right).to_m
+      (left > right).to_m
     when "=="
-      return (left == right).to_m
+      (left == right).to_m
     when "!="
-      return (left != right).to_m
+      (left != right).to_m
     else
-      return MError.new("unknown operator: #{left.type_desc} #{operator} #{right.type_desc}")
+      MError.new("unknown operator: #{left.type_desc} #{operator} #{right.type_desc}")
     end
   end
 
   private def eval_string_infix_expression(operator : String, left : MString, right : MString) : MObject
     if operator != "+"
-      return MError.new("unknown operator: #{left.type_desc} #{operator} #{right.type_desc}")
+      MError.new("unknown operator: #{left.type_desc} #{operator} #{right.type_desc}")
     else
-      return left + right
+      left + right
     end
   end
 
   private def eval_if_expression(if_expression : IfExpression, env : Environment) : MObject?
-    return eval(if_expression.condition?, env).if_not_error do |condition|
+    eval(if_expression.condition?, env).if_not_error do |condition|
       if condition.truthy?
         eval(if_expression.consequence?, env)
       elsif !if_expression.alternative?.nil?
@@ -254,11 +254,11 @@ module Evaluator
         return result
       end
     end
-    return result
+    result
   end
 
   private def eval_expressions(arguments : Array(Expression?)?, env : Environment) : Array(MObject?)
-    return arguments.not_nil!.map do |argument|
+    arguments.not_nil!.map do |argument|
       evaluated = eval(argument, env)
       if evaluated.error?
         return [evaluated]
@@ -272,22 +272,22 @@ module Evaluator
     if value.nil?
       builtin = BUILTINS[identifier.value]?
       if builtin.nil?
-        return MError.new("identifier not found: #{identifier.value}")
+        MError.new("identifier not found: #{identifier.value}")
       else
-        return builtin
+        builtin
       end
     else
-      return value
+      value
     end
   end
 
   private def eval_index_expression(left : MObject?, index : MObject?) : MObject?
     if left.is_a?(MArray) && index.is_a?(MInteger)
-      return eval_array_index_expression(left, index)
+      eval_array_index_expression(left, index)
     elsif left.is_a?(MHash)
-      return eval_hash_index_expression(left, index.not_nil!)
+      eval_hash_index_expression(left, index.not_nil!)
     else
-      return MError.new("index operator not supported: #{left.type_desc}")
+      MError.new("index operator not supported: #{left.type_desc}")
     end
   end
 
@@ -300,7 +300,7 @@ module Evaluator
       return NULL
     end
 
-    return elements[i]?
+    elements[i]?
   end
 
   private def eval_hash_index_expression(hash : MHash, index : MObject) : MObject
@@ -308,12 +308,12 @@ module Evaluator
     when MValue
       pair = hash.pairs[index.hash_key]?
       if !pair.nil?
-        return pair.value
+        pair.value
       else
-        return NULL
+        NULL
       end
     else
-      return MError.new("unusable as a hash key: #{index.type_desc}")
+      MError.new("unusable as a hash key: #{index.type_desc}")
     end
   end
 
@@ -334,7 +334,7 @@ module Evaluator
       end
     end
 
-    return MHash.new(pairs)
+    MHash.new(pairs)
   end
 
   private def apply_function(function : MObject, args : Array(MObject?)) : MObject?
@@ -342,16 +342,16 @@ module Evaluator
     when MFunction
       extend_env = extend_function_env(function, args)
       evaluated = eval(function.body?, extend_env)
-      return unwrap_return_value(evaluated)
+      unwrap_return_value(evaluated)
     when MBuiltinFunction
       result = function.fn.call(args)
       if result
-        return result
+        result
       else
-        return NULL
+        NULL
       end
     else
-      return MError.new("not a function: #{function.type_desc}")
+      MError.new("not a function: #{function.type_desc}")
     end
   end
 
@@ -362,15 +362,15 @@ module Evaluator
         env[identifier.value] = args[i].not_nil!
       end
     end
-    return env
+    env
   end
 
   private def unwrap_return_value(obj : MObject?) : MObject?
     case obj
     when MReturnValue
-      return obj.value
+      obj.value
     else
-      return obj
+      obj
     end
   end
 end
@@ -380,13 +380,13 @@ module Objects
     def truthy? : Bool
       case self
       when Evaluator::NULL
-        return false
+        false
       when Evaluator::MTRUE
-        return true
+        true
       when Evaluator::MFALSE
-        return false
+        false
       else
-        return true
+        true
       end
     end
 
@@ -398,7 +398,7 @@ end
 
 struct Nil
   def if_not_error(& : Objects::MObject -> Objects::MObject?) : Objects::MObject?
-    return self
+    self
   end
 
   def error? : Bool

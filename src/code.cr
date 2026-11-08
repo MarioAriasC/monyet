@@ -1,4 +1,4 @@
-macro ret_ins
+macro ret_ins(ex)
   puts typeof(ex)
   puts ex.message
   return [] of UInt8
@@ -87,65 +87,65 @@ module Code
   def lookup(op : Opcode) : Definition
     case op
     when Opcode::OpConstant
-      return DEF_OP_CONSTANT
+      DEF_OP_CONSTANT
     when Opcode::OpAdd
-      return DEF_OP_ADD
+      DEF_OP_ADD
     when Opcode::OpPop
-      return DEF_OP_POP
+      DEF_OP_POP
     when Opcode::OpSub
-      return DEF_OP_SUB
+      DEF_OP_SUB
     when Opcode::OpMul
-      return DEF_OP_MUL
+      DEF_OP_MUL
     when Opcode::OpDiv
-      return DEF_OP_DIV
+      DEF_OP_DIV
     when Opcode::OpTrue
-      return DEF_OP_TRUE
+      DEF_OP_TRUE
     when Opcode::OpFalse
-      return DEF_OP_FALSE
+      DEF_OP_FALSE
     when Opcode::OpEqual
-      return DEF_OP_EQUAL
+      DEF_OP_EQUAL
     when Opcode::OpNotEqual
-      return DEF_OP_NOT_EQUAL
+      DEF_OP_NOT_EQUAL
     when Opcode::OpGreaterThan
-      return DEF_OP_GREATER_THAN
+      DEF_OP_GREATER_THAN
     when Opcode::OpMinus
-      return DEF_OP_MINUS
+      DEF_OP_MINUS
     when Opcode::OpBang
-      return DEF_OP_BANG
+      DEF_OP_BANG
     when Opcode::OpJumpNotTruthy
-      return DEF_OP_JUMP_NOT_TRUTHY
+      DEF_OP_JUMP_NOT_TRUTHY
     when Opcode::OpJump
-      return DEF_OP_JUMP
+      DEF_OP_JUMP
     when Opcode::OpNull
-      return DEF_OP_NULL
+      DEF_OP_NULL
     when Opcode::OpGetGlobal
-      return DEF_OP_GET_GLOBAL
+      DEF_OP_GET_GLOBAL
     when Opcode::OpSetGlobal
-      return DEF_OP_SET_GLOBAL
+      DEF_OP_SET_GLOBAL
     when Opcode::OpArray
-      return DEF_OP_ARRAY
+      DEF_OP_ARRAY
     when Opcode::OpHash
-      return DEF_OP_HASH
+      DEF_OP_HASH
     when Opcode::OpIndex
-      return DEF_OP_INDEX
+      DEF_OP_INDEX
     when Opcode::OpCall
-      return DEF_OP_CALL
+      DEF_OP_CALL
     when Opcode::OpReturnValue
-      return DEF_OP_RETURN_VALUE
+      DEF_OP_RETURN_VALUE
     when Opcode::OpReturn
-      return DEF_OP_RETURN
+      DEF_OP_RETURN
     when Opcode::OpGetLocal
-      return DEF_OP_GET_LOCAL
+      DEF_OP_GET_LOCAL
     when Opcode::OpSetLocal
-      return DEF_OP_SET_LOCAL
+      DEF_OP_SET_LOCAL
     when Opcode::OpGetBuiltin
-      return DEF_OP_GET_BUILTIN
+      DEF_OP_GET_BUILTIN
     when Opcode::OpClosure
-      return DEF_OP_CLOSURE
+      DEF_OP_CLOSURE
     when Opcode::OpGetFree
-      return DEF_OP_GET_FREE
+      DEF_OP_GET_FREE
     when Opcode::OpCurrentClosure
-      return DEF_OP_CURRENT_CLOSURE
+      DEF_OP_CURRENT_CLOSURE
     else
       raise "opcode #{op} undefined"
     end
@@ -168,16 +168,16 @@ module Code
       end
       offset += width
     end
-    return instruction
+    instruction
   rescue ex
-    ret_ins
+    ret_ins(ex)
   end
 
   def make(op : Opcode) : Instructions
     lookup(op)
-    return [op.to_u8]
+    [op.to_u8]
   rescue ex
-    ret_ins
+    ret_ins(ex)
   end
 
   def onset(ins : Instructions, i : Int32) : Instructions
@@ -189,7 +189,7 @@ module Code
   end
 
   def read_int(ins : Instructions, i : Int32) : Int32
-    return read_u16(offset(ins, i)).to_i
+    read_u16(offset(ins, i)).to_i
   end
 
   private def read_u16(ins : OffsetArray) : UInt16
@@ -198,16 +198,16 @@ module Code
     if (ch1 | ch2) < 0
       raise ""
     else
-      return ((ch1 << 8) + (ch2 << 0)).to_u16
+      ((ch1 << 8) + (ch2 << 0)).to_u16
     end
   end
 
   private def read(ins : OffsetArray, position : Int32) : Int32
-    return (ins[position] & 255.to_u).to_i
+    (ins[position] & 255.to_u).to_i
   end
 
   def read_byte(ins : Instructions, i : Int32) : UInt8
-    return read_u8(offset(ins, i))
+    read_u8(offset(ins, i))
   end
 
   private def read_u8(ins : OffsetArray) : UInt8
@@ -215,7 +215,7 @@ module Code
     if int < 0
       raise "error reading byte"
     else
-      return int.to_u8
+      int.to_u8
     end
   end
 
@@ -224,17 +224,17 @@ module Code
     end
 
     def [](i : Int32) : UInt8
-      return @inner[i + @offset]
+      @inner[i + @offset]
     end
   end
 end
 
 class String
   def to_definition(*operands_with : Int32) : Code::Definition
-    return Code::Definition.new(self, operands_with.to_a)
+    Code::Definition.new(self, operands_with.to_a)
   end
 
   def to_definition : Code::Definition
-    return Code::Definition.new(self, [] of Int32)
+    Code::Definition.new(self, [] of Int32)
   end
 end

@@ -10,9 +10,9 @@ class Object
     end
   end
 
-  def also(& : self | Nil -> _) : self
+  def also(& : self? -> _) : self
     yield self
-    return self
+    self
   end
 end
 

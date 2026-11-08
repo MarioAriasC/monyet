@@ -4,15 +4,15 @@ require "../src/compiler"
 include Compilers
 
 macro mak(op)
-  make(Opcode::{{op}})
+  make(Opcode::{{ op }})
 end
 
 macro mak(op, i)
-  make(Opcode::{{op}}, {{i}})
+  make(Opcode::{{ op }}, {{ i }})
 end
 
 macro mak(op, i, j)
-  make(Opcode::{{op}}, {{i}}, {{j}})
+  make(Opcode::{{ op }}, {{ i }}, {{ j }})
 end
 
 describe "Compiler" do

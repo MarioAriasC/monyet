@@ -10,7 +10,7 @@ module Lexers
     @ch : Char = Char::ZERO
 
     def initialize(@input : String)
-      self.read_char
+      read_char
     end
 
     private def read_char
@@ -81,7 +81,7 @@ module Lexers
 
     def next_token : Token
       skip_whitespace
-      r = nil
+      #       r = nil
       case @ch
       when '='
         r = ends_with_equal(ASSIGN, EQ)
@@ -133,13 +133,13 @@ module Lexers
         end
       end
       read_char
-      return r
+      r
     end
   end
 end
 
 struct Char
   def identifier? : Bool
-    self.letter? || self == '_'
+    letter? || self == '_'
   end
 end

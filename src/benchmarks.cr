@@ -10,32 +10,34 @@ module Benchmarks
   include Objects
   include Evaluator
   include Vm
-  SLOW_INPUT = %(
-let fibonacci = fn(x) {
-	if (x == 0) {
-		return 0;
-	} else {
-		if (x == 1) {
-			return 1;
-		} else {
-			fibonacci(x - 1) + fibonacci(x - 2);
-		}
-	}
-};
-fibonacci(35);)
+  SLOW_INPUT = <<-MONKEY
+    let fibonacci = fn(x) {
+    	if (x == 0) {
+    		return 0;
+    	} else {
+    		if (x == 1) {
+    			return 1;
+    		} else {
+    			fibonacci(x - 1) + fibonacci(x - 2);
+    		}
+    	}
+    };
+    fibonacci(35);
+    MONKEY
 
   FAST_INPUT = fast_input(35)
 
   def fast_input(size : Int32)
-    %(
-let fibonacci = fn(x) {
-    if (x < 2) {
-    	return x;
-    } else {
-    	fibonacci(x - 1) + fibonacci(x - 2);
-    }
-};
-fibonacci(#{size});)
+    <<-MONKEY
+      let fibonacci = fn(x) {
+          if (x < 2) {
+          	return x;
+          } else {
+          	fibonacci(x - 1) + fibonacci(x - 2);
+          }
+      };
+      fibonacci(#{size});
+      MONKEY
   end
 
   def crystal(x : Int32)
@@ -64,7 +66,7 @@ fibonacci(#{size});)
   private def parse(input : String) : Parsers::Program
     lexer = Lexers::Lexer.new(input)
     parser = Parsers::Parser.new(lexer)
-    return parser.parse_program
+    parser.parse_program
   end
 
   private def measure(engine : String, &body : -> MInteger)
@@ -77,18 +79,18 @@ fibonacci(#{size});)
 
   private def step(x : Int64) : Int64
     if x < 2
-      return x
+      x
     else
       step(x - 1) + step(x - 2)
     end
   end
 
   private def fibonacci(x : Int64 = 35) : MInteger
-    return MInteger.new(step(x))
+    MInteger.new(step(x))
   end
 
   private def fast_fibonacci(x : Int64 = 35) : MInteger
-    return MInteger.new(fast_step(x))
+    MInteger.new(fast_step(x))
   end
 
   private def fast_step(x : Int64) : Int64
@@ -104,6 +106,6 @@ fibonacci(#{size});)
       first = second
       second = nth
     end
-    return nth.to_i64
+    nth.to_i64
   end
 end

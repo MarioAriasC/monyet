@@ -4,7 +4,7 @@ require "../src/symbols"
 include Symbols
 
 macro symb(name, scope, index)
-  Symbols::Symbol.new("{{name}}", SymbolScope::{{scope}}, {{index}})
+  Symbols::Symbol.new("{{ name }}", SymbolScope::{{ scope }}, {{ index }})
 end
 
 describe "Symbols" do
@@ -42,11 +42,9 @@ describe "Symbols" do
       symb(a, Global, 0),
       symb(b, Global, 1),
     ].each do |symbol|
-      begin
-        test_symbol(global, symbol)
-      rescue ex : SymbolException
-        raise ex
-      end
+      test_symbol(global, symbol)
+    rescue ex : SymbolException
+      raise ex
     end
   end
 
@@ -195,11 +193,9 @@ describe "Symbols" do
     end
 
     ["b", "d"].each do |unresolvable|
-      begin
-        second_local.resolve(unresolvable)
-        raise "Name #{unresolvable} resolved, but was expected not to"
-      rescue ex : SymbolException
-      end
+      second_local.resolve(unresolvable)
+      raise "Name #{unresolvable} resolved, but was expected not to"
+    rescue SymbolException
     end
   end
 

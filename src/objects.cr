@@ -23,7 +23,7 @@ module Objects
 
   abstract class MObject
     def type_desc : String
-      return {{ @type.stringify }}
+      {{ @type.stringify }}
     end
 
     abstract def inspect : String
@@ -44,7 +44,7 @@ module Objects
     end
 
     def inspect : String
-      return "#{@value}"
+      "#{@value}"
     end
 
     abstract def hash_type : HashType
@@ -54,37 +54,37 @@ module Objects
 
   class MInteger < MValue(Int64)
     def hash_type : HashType
-      return HashType::Integer
+      HashType::Integer
     end
 
     def - : self
-      return MInteger.new(-@value)
+      MInteger.new(-@value)
     end
 
     # int_operations
 
     {% for name in ["+", "-", "*"] %}
-      def {{name.id}}(other : MInteger)
-        MInteger.new(@value {{name.id}} other.value)
+      def {{ name.id }}(other : MInteger)
+        MInteger.new(@value {{ name.id }} other.value)
       end
     {% end %}
 
     def /(other : MInteger)
-      return MInteger.new((@value / other.value).to_i64)
+      MInteger.new((@value / other.value).to_i64)
     end
 
     {% for name in ["<", ">"] %}
-      def {{name.id}}(other : MInteger)
-        return @value {{name.id}} other.value
+      def {{ name.id }}(other : MInteger)
+        return @value {{ name.id }} other.value
       end
     {% end %}
 
     def same?(other : MInteger)
-      return @value == other.value
+      @value == other.value
     end
 
     def hash_key : HashKey
-      return HashKey.new(hash_type, @value.to_u64)
+      HashKey.new(hash_type, @value.to_u64)
     end
   end
 
@@ -95,7 +95,7 @@ module Objects
     end
 
     def inspect : String
-      return @value.inspect
+      @value.inspect
     end
   end
 
@@ -110,7 +110,7 @@ module Objects
     end
 
     def inspect : String
-      return "ERROR: #{@message}"
+      "ERROR: #{@message}"
     end
 
     def to_s(io)
@@ -120,7 +120,7 @@ module Objects
 
   class MNull < MObject
     def inspect : String
-      return "null"
+      "null"
     end
 
     def truthy? : Bool
@@ -146,7 +146,7 @@ module Objects
     # end
 
     def hash_key : HashKey
-      return HashKey.new(hash_type, (@value ? 1 : 0).to_u64)
+      HashKey.new(hash_type, (@value ? 1 : 0).to_u64)
     end
 
     def truthy? : Bool
@@ -156,16 +156,16 @@ module Objects
 
   class MString < MValue(String)
     def +(other : MString) : MString
-      return MString.new(value + other.value)
+      MString.new(value + other.value)
     end
 
     def hash_type : HashType
-      return HashType::String
+      HashType::String
     end
 
     def hash_key : HashKey
       @value = POOL.get(@value)
-      return HashKey.new(hash_type, @value.hash)
+      HashKey.new(hash_type, @value.hash)
     end
   end
 
@@ -182,7 +182,7 @@ module Objects
       if !@parameters.nil?
         parameters = @parameters.not_nil!.map { |parameter| "#{parameter}" }.join(", ")
       end
-      return "fn(#{parameters}) {\n\t#{@body}\n}"
+      "fn(#{parameters}) {\n\t#{@body}\n}"
     end
   end
 
@@ -195,7 +195,7 @@ module Objects
     end
 
     def inspect : String
-      return "builtin function"
+      "builtin function"
     end
   end
 
@@ -206,7 +206,7 @@ module Objects
     end
 
     def inspect : String
-      return "[#{elements.join(", ")}]"
+      "[#{elements.join(", ")}]"
     end
   end
 
@@ -217,7 +217,7 @@ module Objects
     end
 
     def inspect : String
-      return "{#{@pairs.values.map { |pair| "#{pair.key.inspect}: #{pair.value.inspect}" }}}"
+      "{#{@pairs.values.map { |pair| "#{pair.key.inspect}: #{pair.value.inspect}" }}}"
     end
   end
 
@@ -230,7 +230,7 @@ module Objects
     end
 
     def inspect : String
-      return "CompiledFunction[#{self}]"
+      "CompiledFunction[#{self}]"
     end
   end
 
@@ -242,30 +242,30 @@ module Objects
     end
 
     def inspect : String
-      return "Closure[#{self}]"
+      "Closure[#{self}]"
     end
   end
 
   private def arg_size_check(expected_size : Int32, args : Array(MObject?), &body : BuiltinFunction) : MObject?
     length = args.size
     if length != expected_size
-      return MError.new("wrong number of arguments. got=#{length}, want=#{expected_size}")
+      MError.new("wrong number of arguments. got=#{length}, want=#{expected_size}")
     else
-      return body.call(args)
+      body.call(args)
     end
   end
 
   private def array_check(builtin_name : String, args : Array(MObject?), &body : (MArray, Int32) -> MObject?) : MObject?
     if !args[0].is_a?(MArray)
-      return MError.new("argument to `#{builtin_name}` must be ARRAY, got #{args[0].type_desc}")
+      MError.new("argument to `#{builtin_name}` must be ARRAY, got #{args[0].type_desc}")
     else
       array = args[0].as(MArray)
-      return body.call(array, array.elements.size)
+      body.call(array, array.elements.size)
     end
   end
 
   private def len(args : Array(MObject?)) : MObject?
-    return arg_size_check(1, args) do |arguments|
+    arg_size_check(1, args) do |arguments|
       arg = arguments[0]
       case arg
       when MString
@@ -279,7 +279,7 @@ module Objects
   end
 
   private def push(args : Array(MObject?)) : MObject?
-    return arg_size_check(2, args) do |arguments|
+    arg_size_check(2, args) do |arguments|
       array_check(PUSH_NAME, arguments) do |array, _|
         MArray.new(array.elements << args[1])
       end
@@ -287,37 +287,31 @@ module Objects
   end
 
   private def first(args : Array(MObject?)) : MObject?
-    return arg_size_check(1, args) do |arguments|
+    arg_size_check(1, args) do |arguments|
       array_check(FIRST_NAME, arguments) do |array, length|
         if length > 0
           array.elements[0]
-        else
-          nil
         end
       end
     end
   end
 
   private def last(args : Array(MObject?)) : MObject?
-    return arg_size_check(1, args) do |arguments|
+    arg_size_check(1, args) do |arguments|
       array_check(LAST_NAME, arguments) do |array, length|
         if length > 0
           array.elements.last
-        else
-          nil
         end
       end
     end
   end
 
   private def rest(args : Array(MObject?)) : MObject?
-    return arg_size_check(1, args) do |arguments|
+    arg_size_check(1, args) do |arguments|
       array_check(REST_NAME, arguments) do |array, length|
         if length > 0
           array.elements.delete_at(0)
           MArray.new(array.elements)
-        else
-          nil
         end
       end
     end

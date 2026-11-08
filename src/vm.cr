@@ -5,9 +5,9 @@ require "./objects"
 macro execute_build_and_push(col)
   num_elements = Code.read_int(ins, ip + 1)
   current_frame.ip &+= 2
-  {{col}} = build_{{col}}(@sp - num_elements, @sp)
+  {{ col }} = build_{{ col }}(@sp - num_elements, @sp)
   @sp -= num_elements
-  push({{col}})
+  push({{ col }})
 end
 
 module Vm
@@ -23,7 +23,7 @@ module Vm
     end
 
     def instructions : Instructions
-      return @cl.fn.instructions
+      @cl.fn.instructions
     end
   end
 
@@ -164,7 +164,7 @@ module Vm
     end
 
     def last_popped_stack_elem? : MObject?
-      return @stack[@sp]?
+      @stack[@sp]?
     end
 
     private def push(obj : MObject)
@@ -176,14 +176,14 @@ module Vm
     end
 
     private def pop : MObject?
-      return stack_pop.also { @sp -= 1 }
+      stack_pop.also { @sp -= 1 }
     end
 
     private def stack_pop : MObject?
       if @sp == 0
-        return nil
+        return
       else
-        return @stack[@sp - 1]
+        @stack[@sp - 1]
       end
     end
 
@@ -283,7 +283,7 @@ module Vm
         elements[i - start_index] = @stack[i]
         i &+= 1
       end
-      return MArray.new(elements)
+      MArray.new(elements)
     end
 
     private def build_hash(start_index : Int32, end_index : Int32) : MObject
@@ -302,7 +302,7 @@ module Vm
           raise VMException.new("unusable as hash key: #{key.type_desc}")
         end
       end
-      return MHash.new(hashed_pairs)
+      MHash.new(hashed_pairs)
     end
 
     private def execute_index_expression(left : MObject, index : MObject)
