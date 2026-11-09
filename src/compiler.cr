@@ -187,15 +187,15 @@ module Compilers
     end
 
     def bytecode : Bytecode
-      return Bytecode.new(current_instructions, @constants)
+      Bytecode.new(current_instructions, @constants)
     end
 
     def current_scope : CompilationScope
-      return @scopes[@scope_index]
+      @scopes[@scope_index]
     end
 
     private def current_instructions : Instructions
-      return current_scope.instructions
+      current_scope.instructions
     end
 
     def emit(op : Opcode) : Int32
@@ -219,7 +219,7 @@ module Compilers
       @scopes.pop
       @scope_index -= 1
       @symbol_table = @symbol_table.outer.not_nil!
-      return instructions
+      instructions
     end
 
     private def replace_last_pop_with_return
@@ -232,7 +232,7 @@ module Compilers
       pos = current_instructions.size
       current_scope
       current_scope.instructions += ins
-      return pos
+      pos
     end
 
     private def remove_last_pop
@@ -253,15 +253,15 @@ module Compilers
 
     private def add_constant(obj : MObject) : Int
       @constants << obj
-      return @constants.size - 1
+      @constants.size - 1
     end
 
     private def last_instruction_pop? : Bool
-      return last_instruction_is?(Opcode::OpPop)
+      last_instruction_is?(Opcode::OpPop)
     end
 
     private def last_instruction_is?(op : Opcode) : Bool
-      return current_scope.last_instruction.op == op
+      current_scope.last_instruction.op == op
     end
 
     private def change_operand(op_pos : Int32, operand : Int32)

@@ -45,7 +45,7 @@ module Parsers
     getter errors
 
     macro rexp?(r)
-      return {{r}}.as(Expression?)
+      return {{ r }}.as(Expression?)
     end
 
     def initialize(@lexer : Lexer)
@@ -88,17 +88,17 @@ module Parsers
         end
         next_token
       end
-      return Program.new(statements)
+      Program.new(statements)
     end
 
     private def parse_statement : Statement?
       case @cur_token.type
       when LET
-        return parse_let_statement
+        parse_let_statement
       when RETURN
-        return parse_return_statement
+        parse_return_statement
       else
-        return parse_expression_statement
+        parse_expression_statement
       end
     end
 
@@ -112,9 +112,9 @@ module Parsers
       begin
         value = token.literal.to_i64
         rexp? IntegerLiteral.new(token, value)
-      rescue ex : ArgumentError
+      rescue ArgumentError
         @errors << "could not parse #{token.literal} as integer"
-        return nil
+        return
       end
     end
 
@@ -137,14 +137,14 @@ module Parsers
     end
 
     private def cur_token_is(type : TokenType) : Bool
-      return @cur_token.type == type
+      @cur_token.type == type
     end
 
     private def parse_expression(precedence : Precedence) : Expression?
       prefix = @prefix_parsers[@cur_token.type]?
       if prefix == nil
         no_prefix_parse_error(@cur_token.type)
-        return nil
+        return
       end
       left = prefix.as(PrefixParser).call
       while !peek_token_is?(SEMICOLON) && precedence < peek_precedence
@@ -155,7 +155,7 @@ module Parsers
         next_token
         left = infix.as(InfixParser).call(left)
       end
-      return left
+      left
     end
 
     private def parse_group_expression : Expression?
@@ -165,11 +165,11 @@ module Parsers
 
       ex_peek RPAREN
 
-      return exp
+      exp
     end
 
     macro ex_peek(token)
-      if !expect_peek?({{token}})
+      if !expect_peek?({{ token }})
         return nil
       end
     end
@@ -191,8 +191,6 @@ module Parsers
                       next_token
                       ex_peek LBRACE
                       parse_block_statement
-                    else
-                      nil
                     end
       rexp? IfExpression.new(token, condition, consequence, alternative)
     end
@@ -211,7 +209,7 @@ module Parsers
         next_token
       end
 
-      return BlockStatement.new(token, statements)
+      BlockStatement.new(token, statements)
     end
 
     private def parse_let_statement
@@ -230,7 +228,7 @@ module Parsers
         next_token
       end
 
-      return LetStatement.new(token, name, value)
+      LetStatement.new(token, name, value)
     end
 
     private def parse_return_statement
@@ -240,7 +238,7 @@ module Parsers
       while peek_token_is?(SEMICOLON)
         next_token
       end
-      return ReturnStatement.new(token, return_value)
+      ReturnStatement.new(token, return_value)
     end
 
     private def parse_expression_statement
@@ -249,7 +247,7 @@ module Parsers
       if peek_token_is?(SEMICOLON)
         next_token
       end
-      return ExpressionStatement.new(token, expression)
+      ExpressionStatement.new(token, expression)
     end
 
     private def parse_infix_expression(left : Expression?) : Expression?
@@ -290,7 +288,7 @@ module Parsers
       end
 
       ex_peek RPAREN
-      return parameters
+      parameters
     end
 
     private def parse_call_expression(expression : Expression?)
@@ -317,7 +315,7 @@ module Parsers
       end
 
       ex_peek end_type
-      return arguments
+      arguments
     end
 
     private def parse_index_expression(left : Expression?)
@@ -341,7 +339,7 @@ module Parsers
         value = parse_expression(Precedence::Lowest)
         pairs[key.not_nil!] = value.not_nil!
         if !peek_token_is?(RBRACE) && !expect_peek?(COMMA)
-          return nil
+          return
         end
       end
       ex_peek RBRACE

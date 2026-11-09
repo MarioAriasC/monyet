@@ -1,4 +1,3 @@
-# TODO: Write documentation for `Monyet`
 require "./benchmarks"
 require "./objects"
 require "./symbols"

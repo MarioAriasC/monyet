@@ -4,10 +4,10 @@ require "../src/parser"
 include Parsers
 
 macro test_branch(if_expression, branch_name, value)
-  statements = {{if_expression}}.{{branch_name}}?.not_nil!.statements?.not_nil!
+  statements = {{ if_expression }}.{{ branch_name }}?.not_nil!.statements?.not_nil!
   statements.size.should eq(1)
   check_type(ExpressionStatement, statements[0]) do |statement|
-    test_identifier(statement.expression?, {{value}})
+    test_identifier(statement.expression?, {{ value }})
   end
 end
 
@@ -256,7 +256,7 @@ describe "Parser" do
       check_type(IfExpression, expression_statement.expression?) do |if_expression|
         test_infix_expression(if_expression.condition?, "x", "<", "y")
         test_branch if_expression, consequence, "x"
-        if_expression.alternative?.should eq(nil)
+        if_expression.alternative?.should be_nil
       end
     end
   end

@@ -24,7 +24,7 @@ end
 def parse(input : String) : Program
   lexer = Lexer.new(input)
   parser = Parser.new(lexer)
-  return parser.parse_program
+  parser.parse_program
 end
 
 def create_program(input : String) : Program
@@ -32,7 +32,7 @@ def create_program(input : String) : Program
   parser = Parser.new(lexer)
   program = parser.parse_program
   check_parser_errors(parser)
-  return program
+  program
 end
 
 def check_parser_errors(parser : Parser)
@@ -79,8 +79,8 @@ def test_identifier(expression : Expression?, string : String)
 end
 
 macro test_literal(exp, v)
-  {{exp}}.value.should eq({{v}})
-  {{exp}}.token_literal.should eq({{v}}.to_s)
+  {{ exp }}.value.should eq({{ v }})
+  {{ exp }}.token_literal.should eq({{ v }}.to_s)
 end
 
 def test_boolean_literal(expression : Expression?, b : Bool)
@@ -105,7 +105,7 @@ end
 
 def test_eval(input : String)
   program = create_program(input)
-  return Evaluator.eval(program, Environment.new)
+  Evaluator.eval(program, Environment.new)
 end
 
 def test_nil_object(obj : MObject?)
@@ -136,7 +136,7 @@ private def assert_instructions(expected : Instructions, actual : Instructions)
 end
 
 def concat(instructions : Array(Instructions)) : Instructions
-  return instructions.sum
+  instructions.sum
 end
 
 def test_compile_result(input : String, expected_constants : Array, expected_instructions : Array(Instructions))
